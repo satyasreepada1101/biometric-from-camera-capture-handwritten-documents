@@ -1,1 +1,4 @@
 phase2_alexnet/alexnet_writer_identification.keras
+
+# Trained model files
+*.pth
