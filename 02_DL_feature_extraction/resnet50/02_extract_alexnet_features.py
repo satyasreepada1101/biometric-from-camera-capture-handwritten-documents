@@ -1,0 +1,477 @@
+# ============================================================
+# 02_extract_alexnet_features.py
+#
+# Purpose:
+#   Use PRETRAINED AlexNet as a feature extractor.
+#
+# IMPORTANT:
+#   AlexNet is NOT trained.
+#   No optimizer.
+#   No loss.
+#   No backward().
+#   No modification of AlexNet weights.
+#
+# Input:
+#   patch_dataset/train
+#   patch_dataset/test
+#
+# Output:
+#   features/X_train.npy
+#   features/y_train.npy
+#   features/X_test.npy
+#   features/y_test.npy
+#   features/train_metadata.csv
+#   features/test_metadata.csv
+# ============================================================
+
+from pathlib import Path
+import csv
+
+import numpy as np
+
+from PIL import Image
+
+import torch
+import torch.nn as nn
+
+from torchvision import models, transforms
+
+
+# ============================================================
+# CONFIGURATION
+# ============================================================
+
+PATCH_DATASET_DIR = Path("patch_dataset")
+
+FEATURE_DIR = Path("features")
+
+IMAGE_SIZE = 224
+
+BATCH_SIZE = 32
+
+
+# ============================================================
+# DEVICE
+# ============================================================
+
+DEVICE = torch.device(
+    "cuda" if torch.cuda.is_available()
+    else "cpu"
+)
+
+print("=" * 60)
+print("Resnet FEATURE EXTRACTION")
+print("=" * 60)
+
+print(
+    f"\nUsing device: {DEVICE}"
+)
+
+
+# ============================================================
+# LOAD PRETRAINED ALEXNET
+# ============================================================
+print("\nLoading pretrained ResNet50...")
+
+weights = models.ResNet50_Weights.DEFAULT
+
+resnet50 = models.resnet50(
+    weights=weights
+)
+
+resnet50 = resnet50.to(DEVICE)
+
+resnet50.eval()
+
+
+# ============================================================
+# IMAGE PREPROCESSING
+# ============================================================
+
+transform = weights.transforms()
+
+
+# ============================================================
+# GET WRITER DIRECTORIES
+# ============================================================
+
+def get_writer_dirs(split_dir):
+
+    return sorted(
+        [
+            p for p in split_dir.iterdir()
+            if p.is_dir()
+        ],
+        key=lambda x: x.name
+    )
+
+
+# ============================================================
+# GET PATCH FILES
+# ============================================================
+
+def get_patch_files(split_dir):
+
+    writer_dirs = get_writer_dirs(
+        split_dir
+    )
+
+    samples = []
+
+    for writer_id, writer_dir in enumerate(writer_dirs):
+
+        writer_name = writer_dir.name
+
+        patch_files = sorted(
+            [
+                p for p in writer_dir.iterdir()
+                if p.suffix.lower()
+                in {".jpg", ".jpeg", ".png"}
+            ]
+        )
+
+        for patch_path in patch_files:
+
+            samples.append(
+                {
+                    "path": patch_path,
+                    "writer_id": writer_id,
+                    "writer": writer_name
+                }
+            )
+
+    return samples
+
+
+# ============================================================
+# EXTRACT FEATURES FROM ONE BATCH
+# ============================================================
+
+def extract_batch_features(images):
+
+    """
+    images:
+        Tensor [batch, 3, 224, 224]
+
+    Returns:
+        Tensor [batch, 2048]
+    """
+
+    images = images.to(DEVICE)
+
+
+
+    with torch.no_grad():
+
+        x = resnet50.conv1(images)
+        x = resnet50.bn1(x)
+        x = resnet50.relu(x)
+        x = resnet50.maxpool(x)
+
+        x = resnet50.layer1(x)
+        x = resnet50.layer2(x)
+        x = resnet50.layer3(x)
+        x = resnet50.layer4(x)
+
+        x = resnet50.avgpool(x)
+
+        x = torch.flatten(x, 1)
+    return x.cpu()
+
+
+# ============================================================
+# EXTRACT FEATURES FOR A SPLIT
+# ============================================================
+
+def extract_features_for_split(split_name):
+
+    split_dir = (
+        PATCH_DATASET_DIR /
+        split_name
+    )
+
+    print("\n")
+    print("=" * 60)
+    print(
+        f"Processing {split_name.upper()}"
+    )
+    print("=" * 60)
+
+    samples = get_patch_files(
+        split_dir
+    )
+
+    print(
+        f"\nNumber of patches: "
+        f"{len(samples)}"
+    )
+
+    if len(samples) == 0:
+
+        raise RuntimeError(
+            f"No patches found in "
+            f"{split_dir}"
+        )
+
+    all_features = []
+
+    all_labels = []
+
+    all_metadata = []
+
+    # --------------------------------------------------------
+    # Process batches manually
+    # --------------------------------------------------------
+
+    for start in range(
+        0,
+        len(samples),
+        BATCH_SIZE
+    ):
+
+        batch_samples = samples[
+            start:start + BATCH_SIZE
+        ]
+
+        batch_images = []
+
+        for sample in batch_samples:
+
+            image = Image.open(
+                sample["path"]
+            ).convert("RGB")
+
+            image = transform(
+                image
+            )
+
+            batch_images.append(
+                image
+            )
+
+        # --------------------------------------------
+        # Stack batch
+        # --------------------------------------------
+
+        batch_tensor = torch.stack(
+            batch_images
+        )
+
+        # --------------------------------------------
+        # Extract features
+        # --------------------------------------------
+
+        batch_features = (
+            extract_batch_features(
+                batch_tensor
+            )
+        )
+
+        batch_features = (
+            batch_features.numpy()
+        )
+
+        # --------------------------------------------
+        # Store
+        # --------------------------------------------
+
+        all_features.append(
+            batch_features
+        )
+
+        for i, sample in enumerate(
+            batch_samples
+        ):
+
+            all_labels.append(
+                sample["writer_id"]
+            )
+
+            all_metadata.append(
+                {
+                    "writer_id":
+                        sample["writer_id"],
+
+                    "writer":
+                        sample["writer"],
+
+                    "patch_path":
+                        str(sample["path"])
+                }
+            )
+
+        # --------------------------------------------
+        # Progress
+        # --------------------------------------------
+
+        processed = min(
+            start + BATCH_SIZE,
+            len(samples)
+        )
+
+        print(
+            f"Processed "
+            f"{processed}/{len(samples)} patches"
+        )
+
+    # ========================================================
+    # COMBINE FEATURES
+    # ========================================================
+
+    X = np.concatenate(
+        all_features,
+        axis=0
+    )
+
+    y = np.array(
+        all_labels,
+        dtype=np.int64
+    )
+
+    print(
+        f"\nRaw patch feature shape: "
+        f"{X.shape}"
+    )
+
+    print(
+        "Expected second dimension: 2048"
+    )
+
+    # ========================================================
+    # SAVE
+    # ========================================================
+
+    FEATURE_DIR.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    np.save(
+        FEATURE_DIR /
+        f"X_{split_name}_patches.npy",
+        X
+    )
+
+    np.save(
+        FEATURE_DIR /
+        f"y_{split_name}_patches.npy",
+        y
+    )
+
+    metadata_path = (
+        FEATURE_DIR /
+        f"{split_name}_patch_metadata.csv"
+    )
+
+    with open(
+        metadata_path,
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as f:
+
+        fieldnames = [
+            "writer_id",
+            "writer",
+            "patch_path"
+        ]
+
+        writer = csv.DictWriter(
+            f,
+            fieldnames=fieldnames
+        )
+
+        writer.writeheader()
+
+        writer.writerows(
+            all_metadata
+        )
+
+    print(
+        f"\nSaved:"
+    )
+
+    print(
+        FEATURE_DIR /
+        f"X_{split_name}_patches.npy"
+    )
+
+    print(
+        FEATURE_DIR /
+        f"y_{split_name}_patches.npy"
+    )
+
+    return X, y, all_metadata
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+def main():
+
+    # --------------------------------------------------------
+    # Check patch dataset
+    # --------------------------------------------------------
+
+    if not PATCH_DATASET_DIR.exists():
+
+        raise FileNotFoundError(
+            "patch_dataset does not exist.\n"
+            "Run 01_create_patches.py first."
+        )
+
+    # --------------------------------------------------------
+    # Train features
+    # --------------------------------------------------------
+
+    X_train_patches, y_train_patches, train_metadata = (
+        extract_features_for_split(
+            "train"
+        )
+    )
+
+    # --------------------------------------------------------
+    # Test features
+    # --------------------------------------------------------
+
+    X_test_patches, y_test_patches, test_metadata = (
+        extract_features_for_split(
+            "test"
+        )
+    )
+
+    # --------------------------------------------------------
+    # SAVE PATCH-LEVEL FEATURES
+    # --------------------------------------------------------
+
+    print("\n")
+    print("=" * 60)
+    print("FEATURE EXTRACTION COMPLETE")
+    print("=" * 60)
+
+    print(
+        "\nTrain patch features:",
+        X_train_patches.shape
+    )
+
+    print(
+        "Test patch features:",
+        X_test_patches.shape
+    )
+
+    print(
+        "\nResxNet was used ONLY for feature extraction."
+    )
+
+    print(
+        "ResNet weights were NOT trained or modified."
+    )
+
+
+# ============================================================
+# RUN
+# ============================================================
+
+if __name__ == "__main__":
+    main()
