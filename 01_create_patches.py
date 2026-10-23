@@ -29,9 +29,9 @@ OUTPUT_DIR = Path("patch_dataset")
 RANDOM_SEED = 42
 
 # Each writer has 5 pages.
-# We use 4 for training and 1 for testing.
-TRAIN_PAGES_PER_WRITER = 4
-TEST_PAGES_PER_WRITER = 1
+# We use 3 for training and 2 for testing.
+TRAIN_PAGES_PER_WRITER = 3
+TEST_PAGES_PER_WRITER = 2
 
 # Minimum amount of dark content required.
 #

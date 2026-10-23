@@ -1,0 +1,2 @@
+K,PCA_dimensions,PCA_variance_retained,Train_ARI,Train_NMI,Train_Purity,Train_Homogeneity,Train_Completeness,Train_V_measure,Test_ARI,Test_NMI,Test_Purity,Test_Homogeneity,Test_Completeness,Test_V_measure,Test_OneToOne_Accuracy,Train_clusters_used,Test_clusters_used
+40,83,0.9515345096588135,0.06483300589390963,0.6553683933221702,0.45,0.5894087567454258,0.7379511303673392,0.6553683933221702,0.02950994792362131,0.6326880896263725,0.3375,0.5279340573530935,0.7893037723896126,0.6326880896263725,0.2875,40,21
