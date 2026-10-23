@@ -22,6 +22,11 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from xgboost import XGBClassifier
 
 from sklearn.metrics import (
     accuracy_score,
@@ -371,7 +376,45 @@ classifiers = {
                 random_state=42
             )
         )
-    ])
+    ]),
+            "NAIVE_BAYES": GaussianNB(),
+
+"DECISION_TREE": DecisionTreeClassifier(
+    max_depth=20,
+    random_state=42
+),
+
+"XGBOOST": XGBClassifier(
+    n_estimators=200,
+    max_depth=6,
+    learning_rate=0.05,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    random_state=42,
+    n_jobs=-1,
+    eval_metric="mlogloss"
+),
+
+"MLP": Pipeline([
+    (
+        "scaler",
+        StandardScaler()
+    ),
+    (
+        "classifier",
+        MLPClassifier(
+            hidden_layer_sizes=(128,),
+            max_iter=1000,
+            random_state=42
+        )
+    )
+]),
+
+"ADABOOST": AdaBoostClassifier(
+    n_estimators=200,
+    learning_rate=0.5,
+    random_state=42
+)
 }
 
 
