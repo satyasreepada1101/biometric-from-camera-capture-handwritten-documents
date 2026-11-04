@@ -1,0 +1,7 @@
+PCA and StandardScaler are fitted on training pages only.
+The same stratified 80/20 page split (random_state=42) is used for original and PCA features.
+Only the six RGB mean/variance features are used; patch dimensions are excluded.
+All pages are retained and mean-pooled over available patches (12 patches: 76 pages, 16 patches: 124 pages).
+Mean pooling discards patch positions. Different patch counts may also cover different image areas.
+metadata_train.csv and metadata_test.csv preserve each page's patch_count.
+The held-out set contains one page per writer in this dataset; classification metrics should be interpreted cautiously.

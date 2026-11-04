@@ -1,0 +1,3 @@
+PCA and StandardScaler are fitted on training pages only.
+The same stratified 80/20 page split (random_state=42) is used for original and PCA features.
+The held-out set contains one page per writer in this dataset; classification metrics should be interpreted cautiously.

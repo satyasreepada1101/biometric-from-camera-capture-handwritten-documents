@@ -1,0 +1,4 @@
+PCA and StandardScaler are fitted on training pages only.
+The existing train/test page split and page-level mean-pooled AlexNet features are reused.
+Training pages: 160; test pages: 40; maximum PCA components: 159.
+The held-out set contains one page per writer; classification metrics should be interpreted cautiously.

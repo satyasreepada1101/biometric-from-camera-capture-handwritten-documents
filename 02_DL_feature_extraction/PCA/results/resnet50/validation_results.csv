@@ -1,0 +1,12 @@
+check,passed,details
+feature_dimension,True,"train=2048, test=2048, expected=2048"
+training_page_count,True,160
+testing_page_count,True,40
+train_patch_mean_pooling,True,0.0
+test_patch_mean_pooling,True,0.0
+no_train_test_page_overlap,True,0
+scaler_fit_on_training_pages,True,160
+pca_fit_on_training_pages,True,160
+classifier_configurations,True,55
+confusion_matrices,True,55
+baseline_comparison_rows,True,11
