@@ -1,0 +1,2 @@
+CNN_Model,Classifier,Accuracy,Precision_Macro,Recall_Macro,F1_Macro,LIME_Sample_Index,LIME_True_Label,LIME_Predicted_Label
+resnet50,SVM_RBF,0.275,0.17791666666666667,0.275,0.20166666666666666,4,4,4

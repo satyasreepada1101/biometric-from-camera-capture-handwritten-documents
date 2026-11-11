@@ -1,0 +1,5 @@
+Scaler and PCA are fitted on training pages only.
+Existing page-level mean-pooled features and train/test split are reused.
+Training pages: 160; test pages: 40; maximum PCA components: 159.
+Saved baseline CSV differs from this rerun for Accuracy: RANDOM_FOREST; Precision: RANDOM_FOREST; Recall: RANDOM_FOREST; F1: RANDOM_FOREST.
+The held-out set contains one page per writer; classification metrics should be interpreted cautiously.
