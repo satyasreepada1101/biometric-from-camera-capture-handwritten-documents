@@ -1,0 +1,434 @@
+CLUSTERING_V2 — PROJECT NOTES
+
+Purpose
+
+This note records the current state of Clustering_v2 for the handwriting
+writer-identification / writer-clustering project. It summarizes the
+data, scripts, experiments, measured results, output files, and
+limitations observed so far.
+
+IMPORTANT: The numbers below are the actual outputs shared from the runs
+in this conversation. They are exploratory results, not a claim that the
+system is ready for reliable writer identification.
+
+1. DATA AND SPLIT
+
+Dataset: - 40 unique writers. - Training set: 3 pages per writer = 120
+pages. - Test set: 2 pages per writer = 80 pages. - The train/test split
+check passed: 3 train pages and 2 test pages per writer. - The
+page-level feature vectors have 4,096 dimensions before dimensionality
+reduction.
+
+Patch-level features: - Training patches: 1,740. - Test patches:
+1,156. - Training patch feature shape: (1740, 4096). - Test patch
+feature shape: (1156, 4096).
+
+Page aggregation: - Patch features were mean-pooled by page to produce
+one 4,096-dimensional feature vector per page. - Training page feature
+shape: (120, 4096). - Test page feature shape: (80, 4096). - Training
+pages per writer: 3 for all 40 writers. - Test pages per writer: 2 for
+all 40 writers. - Average patches per train page: 14.5 (min 12, max
+16). - Average patches per test page: 14.45 (min 12, max 16).
+
+Page-level files created in Clustering_v2/features/: -
+X_train_page.npy - y_train_page.npy - X_test_page.npy -
+y_test_page.npy - train_page_metadata.csv - test_page_metadata.csv
+
+The aggregation step completed successfully and explicitly printed: “3:2
+split verification passed: 3 train pages and 2 test pages per writer.”
+
+2. V2 FOLDER AND SCRIPTS
+
+The scripts used or created for V2 are:
+
+-   extract_alexnet_features.py Extracts AlexNet patch-level features.
+    This was already present in V2.
+
+-   Clustering_v2_aggregate_page_features.py Aggregates patch-level
+    features into page-level feature vectors and writes the six
+    page-level files listed above.
+
+-   Clustering_v2_kmeans.py Runs K-Means on page-level features,
+    compares several K values, and saves clustering metrics,
+    assignments, and a model pipeline.
+
+-   Clustering_v2_k40_diagnostics.py Runs a fixed K=40 K-Means baseline
+    and saves extra clustering diagnostics and cluster/writer
+    composition.
+
+-   Clustering_v2_preprocessing_comparison.py Compares four feature
+    preprocessing options using K=40.
+
+-   Clustering_v2_evaluate_train_mapped_clusters.py Evaluates K-Means
+    writer predictions by learning a cluster-to-writer mapping from
+    TRAIN labels only, then applying that mapping to test pages.
+
+-   Clustering_v2_agglomerative_clustering.py Runs Agglomerative
+    Clustering with Ward, average, and complete linkage on two train
+    feature representations.
+
+-   Clustering_v2_agglomerative_test_evaluation.py Evaluates Ward
+    Agglomerative clusters on test pages using nearest-training-sample
+    and nearest-cluster-centroid assignment strategies.
+
+-   Clustering_v2_agglomerative_writer_mapping_evaluation.py Evaluates
+    Agglomerative writer predictions using a cluster-to-writer mapping
+    learned from training labels only.
+
+Keep Clustering_v1 untouched. V2 results are saved separately in
+Clustering_v2/clustering_results/.
+
+3. PAGE AGGREGATION RESULTS
+
+TRAIN: - Patch features: (1740, 4096) - Page features: (120, 4096) -
+Unique writers: 40 - Pages per writer: 3 for each writer - Patches per
+page: mean 14.5, standard deviation 1.94, minimum 12, maximum 16
+
+TEST: - Patch features: (1156, 4096) - Page features: (80, 4096) -
+Unique writers: 40 - Pages per writer: 2 for each writer - Patches per
+page: mean 14.45, standard deviation 1.96, minimum 12, maximum 16
+
+Output files: - features/X_train_page.npy - features/y_train_page.npy -
+features/train_page_metadata.csv - features/X_test_page.npy -
+features/y_test_page.npy - features/test_page_metadata.csv
+
+4. K-MEANS EXPERIMENT: VARYING K
+
+Preprocessing in this script: - StandardScaler fit on training pages. -
+PCA retaining 95% variance, fitted on training pages only. - Resulting
+PCA dimensions: 83. - Variance retained: 0.9515. - K-Means tested K
+values: 2, 5, 10, 20, 30, 40, 50. - Writer labels were used for
+evaluation, not to fit K-Means.
+
+Results printed:
+
+K=2: - Train silhouette: 0.4021 - Test ARI: 0.0057 - Test NMI: 0.1620 -
+Test cluster-matched accuracy: 0.0500
+
+K=5: - Train silhouette: 0.0334 - Test ARI: 0.0352 - Test NMI: 0.4262 -
+Test cluster-matched accuracy: 0.0875
+
+K=10: - Train silhouette: 0.0348 - Test ARI: 0.0499 - Test NMI: 0.5478 -
+Test cluster-matched accuracy: 0.1750
+
+K=20: - Train silhouette: 0.0443 - Test ARI: 0.0248 - Test NMI: 0.5406 -
+Test cluster-matched accuracy: 0.2125
+
+K=30: - Train silhouette: 0.0379 - Test ARI: 0.0239 - Test NMI: 0.6149 -
+Test cluster-matched accuracy: 0.2500
+
+K=40: - Train silhouette: 0.0286 - Test ARI: 0.0295 - Test NMI: 0.6327 -
+Test cluster-matched accuracy: 0.2875
+
+K=50: - Train silhouette: 0.0456 - Test ARI: 0.0566 - Test NMI: 0.6739 -
+Test cluster-matched accuracy: 0.3125
+
+The script selected K=2 based on training silhouette alone. This only
+means K=2 had the best silhouette among the tested values; it does NOT
+mean K=2 is the best writer-identification setting. K=40 is a useful
+baseline because there are 40 writers. K=50 was included as an
+exploratory setting, even though it exceeds the number of writers.
+
+Files saved: - clustering_results/kmeans_comparison.csv -
+clustering_results/train_clusters_k2.csv -
+clustering_results/test_clusters_k2.csv -
+clustering_results/best_kmeans_pipeline.joblib
+
+5. K-MEANS FIXED K=40 DIAGNOSTICS
+
+Preprocessing: - StandardScaler fit on training pages. - PCA retaining
+95% variance. - PCA dimensions: 83. - Variance retained: 0.9515. -
+K-Means used K=40.
+
+Metrics: - Train ARI: 0.064833 - Train NMI: 0.655368 - Train purity:
+0.4500 - Train homogeneity: 0.589409 - Train completeness: 0.737952 -
+Train V-measure: 0.655368 - Test ARI: 0.029510 - Test NMI: 0.632688 -
+Test purity: 0.3375 - Test homogeneity: 0.527934 - Test completeness:
+0.789304 - Test V-measure: 0.632688 - Test one-to-one cluster-matched
+accuracy: 0.2875 - Training clusters used: 40 - Test clusters occupied
+by predicted assignments: 21
+
+Interpretation: - K-Means learns 40 training clusters, but test pages
+are assigned to existing centers, so not every learned cluster must
+receive a test page. - The low ARI indicates weak agreement with the
+true writer identities in this configuration. - The cluster-matched
+accuracy is based on optimally matching cluster IDs to labels for
+evaluation; it is not a deployable prediction accuracy.
+
+6. K-MEANS PREPROCESSING COMPARISON (K=40)
+
+All four options used K=40. Preprocessing transformations were fitted on
+training features.
+
+Option A — StandardScaler then PCA(95%): - PCA dimensions: 83 - Variance
+retained: 0.9515 - Train silhouette: 0.0286 - Test ARI: 0.0295 - Test
+NMI: 0.6327 - Test purity: 0.3375 - Test one-to-one cluster-matched
+accuracy: 0.2875 - Training clusters used: 40 - Test clusters used: 21
+
+Option B — Raw features then PCA(95%): - PCA dimensions: 30 - Variance
+retained: 0.9518 - Train silhouette: 0.1584 - Test ARI: 0.2326 - Test
+NMI: 0.8255 - Test purity: 0.5875 - Test one-to-one cluster-matched
+accuracy: 0.5750 - Training clusters used: 40 - Test clusters used: 31
+
+Option C — L2-normalize features then PCA(95%): - PCA dimensions: 31 -
+Variance retained: 0.9503 - Train silhouette: 0.1637 - Test ARI:
+0.2202 - Test NMI: 0.8292 - Test purity: 0.5875 - Test one-to-one
+cluster-matched accuracy: 0.5750 - Training clusters used: 40 - Test
+clusters used: 33
+
+Option D — StandardScaler then PCA(95%), then L2-normalize reduced
+vectors: - PCA dimensions: same as Option A (83) - Train silhouette:
+0.0736 - Test ARI: 0.1643 - Test NMI: 0.7983 - Test purity: 0.5125 -
+Test one-to-one cluster-matched accuracy: 0.5125 - Training clusters
+used: 40 - Test clusters used: 29
+
+Current promising K-Means preprocessing: - Raw features + PCA retaining
+95% variance. - It gave the strongest test ARI and matching accuracy
+among the four tested preprocessing options. - L2-normalize then PCA
+gave the highest test NMI, tied purity and tied cluster-matched
+accuracy. - Because these approaches were compared on the same test set,
+these are exploratory comparisons and the test set is no longer an
+untouched final benchmark.
+
+7. K-MEANS TRAIN-DERIVED WRITER MAPPING
+
+This evaluation used the raw-features + PCA K=40 clustering assignments.
+The mapping from cluster ID to writer ID was learned using training
+labels only. Then test cluster IDs were mapped using that
+training-derived mapping.
+
+Results: - Test pages: 80 - Mapped test-page coverage: 100% - Test
+writer prediction accuracy: 0.4625 (46.25%, 37/80 pages) - Test ARI:
+0.2326 - Test NMI: 0.8255
+
+Interpretation: - This is a more realistic prediction check than using
+test labels to optimally remap cluster IDs. - The mapping is simple:
+each training cluster is assigned its most common writer. - The output
+classification report showed large differences by writer. Some writers
+were correctly predicted; many had zero recall in this run. - This is
+still a simple cluster-to-writer mapping baseline, not a fully
+supervised writer classifier.
+
+Files saved: -
+clustering_results/test_train_mapped_writer_predictions_k40_raw_pca.csv -
+clustering_results/train_derived_cluster_to_writer_mapping_k40_raw_pca.csv
+
+8. AGGLOMERATIVE CLUSTERING — TRAIN RESULTS
+
+Setup: - 120 training pages. - 4,096 original feature dimensions. - K=40
+clusters. - Linkages: Ward, average, complete. - Two feature
+representations: A. Raw features -> PCA retaining 95% variance (30
+dimensions). B. StandardScaler -> PCA retaining 95% variance (83
+dimensions).
+
+Results ranked by training ARI:
+
+1)  Raw features + PCA(95%), Ward:
+
+-   Training silhouette: 0.175870
+-   Training ARI: 0.320780
+-   Training NMI: 0.820924
+
+2)  Raw features + PCA(95%), Complete:
+
+-   Training silhouette: 0.171878
+-   Training ARI: 0.242783
+-   Training NMI: 0.790067
+
+3)  Raw features + PCA(95%), Average:
+
+-   Training silhouette: 0.140316
+-   Training ARI: 0.152634
+-   Training NMI: 0.757824
+
+4)  StandardScaler + PCA(95%), Ward:
+
+-   Training silhouette: 0.042998
+-   Training ARI: 0.124403
+-   Training NMI: 0.718959
+
+5)  StandardScaler + PCA(95%), Complete:
+
+-   Training silhouette: 0.039740
+-   Training ARI: 0.063513
+-   Training NMI: 0.656948
+
+6)  StandardScaler + PCA(95%), Average:
+
+-   Training silhouette: 0.083349
+-   Training ARI: 0.008644
+-   Training NMI: 0.516251
+
+Best training configuration: - Raw features + PCA(95%) + Ward linkage. -
+This is the best among the tested training configurations; held-out
+results must also be considered.
+
+Files saved: - clustering_results/07_agglomerative_comparison.csv -
+clustering_results/07_agglomerative_assignments.csv
+
+9. AGGLOMERATIVE HELD-OUT TEST EVALUATION
+
+The evaluation script fitted PCA on training pages only, retaining 95%
+variance (30 dimensions), then fitted Ward Agglomerative Clustering with
+K=40 on the training pages.
+
+Agglomerative clustering does not have a standard predict() method for
+new samples. The script assigned test pages to existing training
+clusters using two approximations:
+
+A. Nearest training sample: - Occupied test clusters: 33 - Test
+silhouette: 0.0346 - Test ARI: 0.2227 - Test NMI: 0.8303
+
+B. Nearest cluster centroid: - Occupied test clusters: 34 - Test
+silhouette: 0.0489 - Test ARI: 0.2162 - Test NMI: 0.8296
+
+Interpretation: - The two strategies produced similar cluster-agreement
+metrics. - Nearest training sample was slightly higher in ARI and NMI. -
+Nearest centroid was slightly higher in silhouette. - These are cluster
+agreement scores, not writer-prediction accuracy.
+
+Files saved: - clustering_results/08_agglomerative_test_metrics.csv -
+clustering_results/08_agglomerative_test_assignments.csv -
+clustering_results/08_agglomerative_test_bundle.joblib
+
+10. AGGLOMERATIVE TRAIN-DERIVED WRITER MAPPING
+
+The evaluation script: - Fits raw-feature PCA on training pages only (30
+dimensions, 95.18% variance retained). - Fits Ward Agglomerative
+Clustering with K=40 on training pages. - Maps each training cluster to
+its most common writer using training labels only. - Assigns test pages
+by nearest training sample or nearest cluster centroid. - Maps those
+predicted clusters to writer IDs using the training-derived mapping.
+
+Results: - Nearest training sample writer accuracy: 0.4125 (41.25%,
+33/80 pages). - Nearest cluster centroid writer accuracy: 0.3625
+(36.25%, 29/80 pages).
+
+Interpretation: - K-Means with the same style of train-derived
+cluster-to-writer mapping achieved 46.25% test accuracy, versus 41.25%
+for Agglomerative nearest-sample mapping and 36.25% for Agglomerative
+centroid mapping. - This suggests K-Means is better on this particular
+writer-mapping accuracy measure in the current experiment. - The metrics
+are still exploratory and the mapping baseline is not a fully supervised
+writer classifier.
+
+Files saved: -
+clustering_results/agglomerative_train_mapped_writer_predictions.csv -
+clustering_results/agglomerative_train_cluster_writer_mapping.csv
+
+11. COMPARISON SUMMARY
+
+K-Means, raw features + PCA(95%), K=40: - Train-derived writer
+prediction accuracy: 46.25% (37/80). - Test ARI: 0.2326. - Test NMI:
+0.8255. - One-to-one test cluster-matched accuracy (uses test labels for
+remapping): 57.50%. This must NOT be described as deployable writer
+prediction accuracy.
+
+Agglomerative Ward, raw features + PCA(95%), K=40: -
+Nearest-training-sample test ARI: 0.2227. - Nearest-training-sample test
+NMI: 0.8303. - Nearest-training-sample train-derived writer prediction
+accuracy: 41.25% (33/80). - Nearest-centroid train-derived writer
+prediction accuracy: 36.25% (29/80).
+
+How to interpret: - K-Means has the highest train-derived writer
+prediction accuracy of the tested mapping baselines. - Agglomerative has
+a slightly higher test NMI than K-Means, but NMI and writer prediction
+accuracy are different measures. - Raw-feature PCA is clearly more
+promising than StandardScaler + PCA for these experiments. - Neither
+method has demonstrated reliable writer identification across all 40
+writers. - More evidence is needed before selecting a final model or
+claiming real-world identification performance.
+
+12. IMPORTANT METRIC DEFINITIONS
+
+-   K-Means: partitions samples into K groups around cluster centroids.
+-   Agglomerative Clustering: builds a hierarchy of clusters; Ward
+    linkage merges groups to minimize increases in within-cluster
+    variance.
+-   PCA: reduces feature dimensions while retaining a specified amount
+    of variance.
+-   StandardScaler: standardizes each feature to mean 0 and variance 1,
+    based on training data.
+-   L2 normalization: rescales each sample vector to unit length.
+-   Silhouette score: measures how compact and separated clusters are;
+    it does not directly measure writer identity correctness.
+-   ARI (Adjusted Rand Index): measures agreement between clustering and
+    true labels, adjusted for chance. Higher is better; 1 means perfect
+    agreement, near 0 means chance-level agreement, and negative values
+    indicate worse-than-chance agreement.
+-   NMI (Normalized Mutual Information): measures shared information
+    between clusters and labels. Higher indicates stronger association,
+    but does not alone mean that each cluster corresponds to exactly one
+    writer.
+-   Purity: fraction of samples that belong to the majority writer in
+    each cluster. It can be inflated by using more clusters.
+-   Cluster-matched accuracy: finds the best cluster-to-label matching
+    using the evaluation labels. It is useful as a clustering diagnostic
+    but is not a deployable prediction accuracy.
+-   Train-derived writer accuracy: maps clusters to writers using
+    training labels only, then predicts test writers. This is more
+    realistic, but the simple majority-writer mapping can be limited if
+    a cluster contains multiple writers.
+
+Important evaluation note: The test set was used repeatedly to compare
+preprocessing and configurations. Therefore, test results are
+exploratory and should not be presented as an untouched final benchmark.
+For a stronger final evaluation, select the pipeline using
+training/validation data, freeze it, and evaluate once on a new
+untouched test set if available.
+
+13. CURRENT CONCLUSION
+
+1.  V2 successfully extracts patch-level AlexNet features and aggregates
+    them into page-level vectors.
+2.  The 3-train-page / 2-test-page split is verified for all 40 writers.
+3.  Raw features + PCA retaining 95% variance performed substantially
+    better than StandardScaler + PCA in the tested clustering
+    configurations.
+4.  K-Means with K=40 and raw-feature PCA had the best train-derived
+    writer-mapping accuracy among the current tested approaches
+    (46.25%).
+5.  Agglomerative Ward with raw-feature PCA had the strongest training
+    clustering ARI (0.3208), but its test cluster-agreement and
+    writer-mapping results were slightly below K-Means on some measures.
+6.  The current system is an exploratory unsupervised clustering
+    pipeline, not yet a reliable writer-identification system.
+7.  Do not claim that cluster IDs are writer IDs. Cluster IDs are
+    arbitrary; any cluster-to-writer mapping must be learned from
+    training labels only for prediction.
+
+Suggested next steps: - Keep all current outputs and scripts. - Create a
+clean final comparison table from the saved CSV files. - If more model
+development is needed, consider a properly supervised writer classifier
+using training labels, with validation-based model selection and a final
+untouched test set. That is a different experiment from unsupervised
+clustering. - Inspect errors by writer and check whether the same
+writer’s pages cluster together. - Record software versions, random
+seeds, and exact preprocessing settings for reproducibility. - Do not
+overwrite Clustering_v1 outputs.
+
+14. MAIN OUTPUT FILES TO KEEP
+
+In Clustering_v2/features/: - X_train_page.npy - y_train_page.npy -
+X_test_page.npy - y_test_page.npy - train_page_metadata.csv -
+test_page_metadata.csv - Existing patch-level feature arrays and
+metadata CSVs.
+
+In Clustering_v2/clustering_results/: - kmeans_comparison.csv -
+train_clusters_k2.csv - test_clusters_k2.csv -
+best_kmeans_pipeline.joblib - k40_diagnostics_metrics.csv -
+train_clusters_k40.csv - test_clusters_k40.csv -
+test_k40_cluster_writer_composition.csv -
+preprocessing_comparison_k40.csv -
+train_raw_features_then_pca95_k40.csv -
+test_raw_features_then_pca95_k40.csv -
+test_train_mapped_writer_predictions_k40_raw_pca.csv -
+train_derived_cluster_to_writer_mapping_k40_raw_pca.csv -
+07_agglomerative_comparison.csv - 07_agglomerative_assignments.csv -
+08_agglomerative_test_metrics.csv -
+08_agglomerative_test_assignments.csv -
+08_agglomerative_test_bundle.joblib -
+agglomerative_train_mapped_writer_predictions.csv -
+agglomerative_train_cluster_writer_mapping.csv
+
+End of notes.

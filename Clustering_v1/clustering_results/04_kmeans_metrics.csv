@@ -1,0 +1,2 @@
+algorithm,n_samples,n_features,n_clusters_requested,n_clusters_found,inertia,silhouette_score,adjusted_rand_index,normalized_mutual_info
+KMeans,160,4096,40,40,165527.453125,0.016454365104436874,0.08406102791253603,0.6164810035113949

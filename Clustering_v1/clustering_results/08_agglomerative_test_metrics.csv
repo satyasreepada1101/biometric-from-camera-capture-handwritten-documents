@@ -1,0 +1,3 @@
+method,test_samples,occupied_test_clusters,test_silhouette,test_ari,test_nmi
+Nearest_training_sample,40,14,0.03689630329608917,0.0,0.7635224409225106
+Nearest_cluster_centroid,40,18,-0.0299287848174572,0.0,0.8181518940902901

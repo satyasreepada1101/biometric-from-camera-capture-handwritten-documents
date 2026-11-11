@@ -1,0 +1,3 @@
+method,test_samples,n_clusters_predicted,test_silhouette,test_ari,test_nmi
+Original_scaled,40,15,-0.12006624042987823,0.0,0.7855612972319206
+PCA_100,40,17,-0.014148175716400146,0.0,0.8115007740982139
