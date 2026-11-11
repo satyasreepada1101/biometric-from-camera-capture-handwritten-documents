@@ -1,0 +1,12 @@
+Rank (by Macro F1),Classifier,Accuracy (%),Macro Precision (%),Macro Recall (%),Macro F1-score (%),Weighted Precision (%),Weighted Recall (%),Weighted F1-score (%)
+1,Logistic Regression,60,50,60,52.92,50,60,52.92
+2,Linear SVM,50,46.25,50,47.5,46.25,50,47.5
+3,XGBoost,42.5,35,42.5,37,35,42.5,37
+4,Random Forest,40,34.58,40,36.25,34.58,40,36.25
+5,RBF SVM,37.5,30.42,37.5,32.5,30.42,37.5,32.5
+6,KNN (K=5),32.5,28.33,32.5,29.58,28.33,32.5,29.58
+7,Naive Bayes,32.5,28.69,32.5,29.38,28.69,32.5,29.38
+8,KNN (K=3),35,26.46,35,28.92,26.46,35,28.92
+9,Decision Tree,30,23.54,30,25.17,23.54,30,25.17
+10,AdaBoost,10,2.41,10,3.52,2.41,10,3.52
+11,MLP Classifier,7.5,1.37,7.5,2.19,1.37,7.5,2.19

@@ -1,0 +1,5 @@
+Rank (by Macro F1),Model,Test Images,Accuracy (%),Macro Precision (%),Macro Recall (%),Macro F1-score (%),Weighted Precision (%),Weighted Recall (%),Weighted F1-score (%)
+1,MobileNetV2,572,50.7,52.08,51.56,49.34,51.93,50.7,48.82
+2,ResNet50,572,47.9,50.56,49.01,47.61,49.68,47.9,46.5
+3,AlexNet,572,49.3,49.79,49.9,47.35,49.56,49.3,46.93
+4,EfficientNet-B0,572,43.36,45.93,43.85,42.13,45.27,43.36,41.56

@@ -23,6 +23,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from lime.lime_tabular import LimeTabularExplainer
 
 def build_models():
     models = {
@@ -49,11 +50,11 @@ def build_models():
         ]),
         "Linear SVM": Pipeline([
             ("scaler", StandardScaler()),
-            ("model", SVC(kernel="linear", random_state=42))
+            ("model", SVC(kernel="linear", probability=True, random_state=42))
         ]),
         "RBF SVM": Pipeline([
             ("scaler", StandardScaler()),
-            ("model", SVC(kernel="rbf", random_state=42))
+            ("model", SVC(kernel="rbf", probability=True, random_state=42))
         ]),
         "KNN (K=3)": Pipeline([
             ("scaler", StandardScaler()),
@@ -138,13 +139,16 @@ def main():
     models = build_models()
     results = []
     prediction_store = {}
+    trained_models = {}
 
     for name, model in models.items():
         print(f"Training: {name}")
         try:
             model.fit(X_train, y_train)
             predictions = model.predict(X_test)
+
             prediction_store[name] = predictions
+            trained_models[name] = model
 
             results.append({
                 "Classifier": name,
@@ -239,6 +243,87 @@ def main():
         plt.close(fig)
 
     print("\nFinished.")
+        # ==============================
+    # LIME EXPLAINABILITY
+    # ==============================
+
+    print("\nGenerating LIME explanations...")
+
+    lime_dir = os.path.join(output_dir, "LIME_Explanations")
+    os.makedirs(lime_dir, exist_ok=True)
+
+    # Select the best-performing classifier using macro F1.
+    best_model_name = results_df.iloc[0]["Classifier"]
+    best_model = trained_models[best_model_name]
+
+    print(f"Best classifier for LIME: {best_model_name}")
+
+    # Create LIME explainer.
+    explainer = LimeTabularExplainer(
+        training_data=X_train,
+        feature_names=X.columns.tolist(),
+        class_names=class_names.tolist(),
+        mode="classification",
+        discretize_continuous=True,
+        random_state=42
+    )
+
+    # Explain 5 test samples.
+    num_samples = min(5, len(X_test))
+
+    for i in range(num_samples):
+
+        sample = X_test[i]
+
+        # Get predicted class.
+        predicted_class = int(
+            best_model.predict(sample.reshape(1, -1))[0]
+        )
+
+        predicted_name = class_names[predicted_class]
+
+        # Generate LIME explanation.
+        explanation = explainer.explain_instance(
+            data_row=sample,
+            predict_fn=best_model.predict_proba,
+            num_features=min(10, X_train.shape[1]),
+            labels=[predicted_class]
+        )
+
+        # Save explanation as HTML.
+        html_path = os.path.join(
+            lime_dir, f"lime_explanation_sample_{i+1}.html"
+        )
+
+        explanation.save_to_file(html_path)
+
+        # Save explanation as PNG.
+        fig = explanation.as_pyplot_figure(
+            label=predicted_class
+        )
+
+        fig.suptitle(
+            f"LIME Explanation - {best_model_name}\n"
+            f"Predicted Writer: {predicted_name}"
+        )
+
+        fig.tight_layout()
+
+        fig.savefig(
+            os.path.join(
+                lime_dir, f"lime_explanation_sample_{i+1}.png"
+            ),
+            dpi=300,
+            bbox_inches="tight"
+        )
+
+        plt.close(fig)
+
+        print(
+            f"Sample {i+1}: Predicted writer = {predicted_name}"
+        )
+
+    print(f"LIME explanations saved in: {lime_dir}")
     print(f"Metrics CSV: {os.path.join(output_dir, 'classifier_metrics.csv')}")
     print(f"Graphs and per-class reports: {output_dir}")
     print("\nResults (sorted by macro F1):")
