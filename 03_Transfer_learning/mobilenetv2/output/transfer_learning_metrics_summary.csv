@@ -1,2 +1,0 @@
-model,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
-MobileNetV2,572,2.527408084669313,0.506993006993007,0.520847037091922,0.515625,0.49344102326819517,0.5192762235012695,0.506993006993007,0.4882047459800018

@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+AlexNet,Brightness and Contrast (0.1),572,2.476359940075374,0.46153846153846156,0.5181105887576476,0.4776041666666667,0.45460829114460805,0.5150152835189857,0.46153846153846156,0.44355435501410195
