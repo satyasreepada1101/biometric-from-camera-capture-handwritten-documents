@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+MobileNetV2,Rotation (±5 degrees),572,2.6178310601027697,0.46853146853146854,0.5149018158526126,0.4786458333333333,0.45549151192489507,0.5129825797071444,0.46853146853146854,0.44898978014211444

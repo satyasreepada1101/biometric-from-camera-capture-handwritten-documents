@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+ResNet50,Translation (up to 3% horizontally and vertically),572,2.5682450524576894,0.4965034965034965,0.5200356520386554,0.50625,0.4910454646175554,0.5123199163700997,0.4965034965034965,0.4812901601485652

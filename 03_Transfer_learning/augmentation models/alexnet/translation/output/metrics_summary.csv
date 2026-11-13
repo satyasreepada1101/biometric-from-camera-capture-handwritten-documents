@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+AlexNet,Translation (up to 3% horizontally and vertically),572,1.9883892327755481,0.48951048951048953,0.5312576913510246,0.496875,0.4848513769091314,0.5311222716037791,0.48951048951048953,0.48060063379203166

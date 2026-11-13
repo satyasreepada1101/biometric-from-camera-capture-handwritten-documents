@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+MobileNetV2,Brightness and Contrast (0.1),572,2.535892186464963,0.5297202797202797,0.5562126938064071,0.5359375,0.5149031281708549,0.5542473064638647,0.5297202797202797,0.5101128723912576

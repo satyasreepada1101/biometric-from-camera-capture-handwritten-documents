@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+AlexNet,Rotation (±5 degrees),572,2.0078797728031663,0.4737762237762238,0.5139870176604056,0.4807291666666666,0.474134708130917,0.505077870455136,0.4737762237762238,0.46685600508296404

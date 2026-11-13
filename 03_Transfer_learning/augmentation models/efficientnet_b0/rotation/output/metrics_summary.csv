@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+EfficientNet-B0,Rotation (±5 degrees),572,2.559021547957734,0.3916083916083916,0.39265002562796675,0.40104166666666663,0.37035969323629586,0.39156267654827914,0.3916083916083916,0.3643751229282188

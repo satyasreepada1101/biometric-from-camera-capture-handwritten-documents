@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+MobileNetV2,Scaling (0.95 to 1.05),572,2.565771479706664,0.5297202797202797,0.5389258793107478,0.5390625,0.5178158795900634,0.5323182686435842,0.5297202797202797,0.5101380514012208

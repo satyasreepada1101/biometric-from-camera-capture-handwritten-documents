@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+ResNet50,Brightness and Contrast (0.1),572,2.727197428683301,0.48776223776223776,0.5011184968903657,0.5046875,0.4776183103278373,0.4874479832226798,0.48776223776223776,0.4621304940077169

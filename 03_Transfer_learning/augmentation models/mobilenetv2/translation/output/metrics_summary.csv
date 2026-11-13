@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+MobileNetV2,Translation (up to 3% horizontally and vertically),572,2.548304762873616,0.5262237762237763,0.524383599716417,0.5338541666666666,0.5090777675268896,0.5224024214303286,0.5262237762237763,0.5049020810201577

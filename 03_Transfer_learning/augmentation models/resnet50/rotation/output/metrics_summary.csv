@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+ResNet50,Rotation (±5 degrees),572,2.663899299981711,0.44405594405594406,0.5093061497941611,0.4536458333333334,0.4381824026347251,0.49487283152485745,0.44405594405594406,0.4279073501536911

@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+EfficientNet-B0,Brightness and Contrast (0.1),572,2.4448403928663347,0.4737762237762238,0.4714713924920968,0.4786458333333334,0.44878691640910817,0.46633503364840917,0.4737762237762238,0.44386524386733084

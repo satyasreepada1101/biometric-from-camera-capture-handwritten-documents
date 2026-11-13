@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+AlexNet,Scaling (0.95 to 1.05),572,2.008950986228623,0.4755244755244755,0.5001577163698874,0.484375,0.4648597029037894,0.49084135653329625,0.4755244755244755,0.45711030976871425

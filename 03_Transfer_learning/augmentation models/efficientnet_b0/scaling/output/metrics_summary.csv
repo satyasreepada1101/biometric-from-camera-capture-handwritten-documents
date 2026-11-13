@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+EfficientNet-B0,Scaling (0.95 to 1.05),572,2.477941301319149,0.4143356643356643,0.392598976974751,0.4197916666666666,0.3831637947668784,0.39501175805766725,0.4143356643356643,0.3805067383480019

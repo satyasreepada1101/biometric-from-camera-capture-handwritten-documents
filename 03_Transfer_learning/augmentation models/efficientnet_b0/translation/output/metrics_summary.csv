@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+EfficientNet-B0,Translation (up to 3% horizontally and vertically),572,2.4484014194328467,0.43356643356643354,0.4220311494815651,0.44375,0.4152226082465763,0.4165939485972508,0.43356643356643354,0.4075609639169108
