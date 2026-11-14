@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Research dashboard for handwritten document writer identification experiments.">
+  <title>biometric from camera capture handwritten documents / experiment map</title>
+  <style>
+    :root {
+      --ink: #10232b;
+      --muted: #6b7a7e;
+      --paper: #f5f7f3;
+      --card: #ffffff;
+      --line: #d8e1de;
+      --teal: #0d7770;
+      --teal-soft: #d9f1ed;
+      --orange: #c46b32;
+      --orange-soft: #fff0e3;
+      --red: #b94c4c;
+      --red-soft: #fff0f0;
+      --shadow: 0 18px 50px rgba(20, 49, 54, .08);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); background:
+        radial-gradient(circle at 10% 0%, rgba(13,119,112,.08), transparent 30rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .shell { max-width: 1440px; margin: auto; padding: 28px 34px 70px; }
+    header {
+      display: flex; justify-content: space-between; align-items: center; gap: 20px;
+      padding: 8px 0 44px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.03em; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--teal); box-shadow: 5px 5px 0 #9fd5ce; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav a { text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 700; padding: 9px 13px; border-radius: 99px; }
+    nav a:hover { background: var(--teal-soft); color: var(--teal); }
+    .eyebrow { color: var(--teal); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: 11px; }
+    h1 { max-width: 850px; margin: 10px 0 16px; font-size: clamp(40px, 6vw, 80px); line-height: .98; letter-spacing: -.075em; }
+    .intro { max-width: 670px; color: var(--muted); font-size: 18px; }
+    .hero { display: grid; grid-template-columns: 1.3fr .7fr; gap: 28px; align-items: end; margin-bottom: 38px; }
+    .status { border: 1px solid var(--line); background: rgba(255,255,255,.75); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+    .status strong { display: block; font-size: 28px; letter-spacing: -.05em; }
+    .status p { color: var(--muted); margin: 4px 0 0; font-size: 13px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 48px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+    .stat b { display: block; font-size: 29px; letter-spacing: -.06em; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    section { scroll-margin-top: 24px; margin: 54px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 20px; }
+    h2 { font-size: 30px; letter-spacing: -.055em; margin: 4px 0; }
+    .section-head p { color: var(--muted); max-width: 540px; margin: 0; font-size: 14px; }
+    .map-wrap { overflow-x: auto; padding: 18px 3px 26px; }
+    .map { min-width: 1080px; display: grid; grid-template-columns: 1fr 46px 1fr 46px 1fr; align-items: center; gap: 10px; }
+    .map-node { min-height: 188px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 21px; box-shadow: var(--shadow); }
+    .map-node.center { background: var(--ink); color: white; border-color: var(--ink); }
+    .map-node h3 { margin: 12px 0 6px; font-size: 19px; letter-spacing: -.035em; }
+    .map-node p { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+    .center p { color: #b6c5c7; }
+    .node-icon { font-size: 25px; }
+    .connector { height: 2px; background: var(--teal); position: relative; }
+    .connector:after { content: ""; position: absolute; right: -2px; top: -5px; border-left: 10px solid var(--teal); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 5px 9px; background: var(--teal-soft); color: var(--teal); font-size: 11px; font-weight: 800; }
+    .pill.orange { background: var(--orange-soft); color: var(--orange); }
+    .pill.red { background: var(--red-soft); color: var(--red); }
+    .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .insight { border-radius: var(--radius); padding: 25px; border: 1px solid; position: relative; overflow: hidden; }
+    .insight.best { background: var(--teal-soft); border-color: #a5d9d2; }
+    .insight.worst { background: var(--red-soft); border-color: #f0c5c5; }
+    .insight h3 { font-size: 25px; margin: 12px 0 5px; letter-spacing: -.05em; }
+    .insight p { color: #4e6265; font-size: 14px; margin: 4px 0 18px; }
+    .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .metric { background: rgba(255,255,255,.72); border-radius: 12px; padding: 12px; }
+    .metric b { display: block; font-size: 20px; letter-spacing: -.05em; }
+    .metric span { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 21px; box-shadow: var(--shadow); }
+    .card h3 { margin: 0 0 4px; font-size: 18px; letter-spacing: -.035em; }
+    .card .sub { margin: 0 0 16px; color: var(--muted); font-size: 12px; }
+    .bar { display: flex; height: 10px; margin: 9px 0 17px; background: #edf1ef; border-radius: 99px; overflow: hidden; }
+    .bar i { display: block; background: var(--teal); border-radius: inherit; }
+    .bar i.low { background: var(--red); }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .mini-table td { padding: 8px 0; border-bottom: 1px solid #edf0ee; }
+    .mini-table td:last-child { text-align: right; font-weight: 800; }
+    .mini-table .good td:last-child { color: var(--teal); }
+    .mini-table .bad td:last-child { color: var(--red); }
+    .artifact { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #edf0ee; font-size: 13px; }
+    .artifact a { color: var(--teal); font-weight: 800; text-decoration: none; font-size: 12px; }
+    .artifact a:hover { text-decoration: underline; }
+    .registry { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .registry .card { padding: 19px; }
+    .registry-list { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+    .registry-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid #edf0ee; font-size: 12px; }
+    .registry-list a { color: var(--teal); font-weight: 800; text-decoration: none; white-space: nowrap; }
+    .registry-list a:hover { text-decoration: underline; }
+    .value-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .value-table th { color: var(--muted); text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; padding: 0 8px 10px; }
+    .value-table td { padding: 9px 8px; border-top: 1px solid #edf0ee; }
+    .value-table td:not(:first-child), .value-table th:not(:first-child) { text-align: right; }
+    .value-table .best td { color: var(--teal); font-weight: 800; }
+    .value-table .worst td { color: var(--red); }
+    .table-scroll { overflow-x: auto; }
+    .callout { background: #fff7e9; border: 1px solid #f0d6a3; border-radius: var(--radius); padding: 20px 23px; color: #745321; }
+    .callout strong { color: #9b5b10; }
+    footer { border-top: 1px solid var(--line); padding-top: 24px; color: var(--muted); font-size: 12px; display: flex; justify-content: space-between; gap: 20px; }
+    @media (max-width: 850px) {
+      .shell { padding: 20px 18px 50px; } header { align-items: flex-start; flex-direction: column; padding-bottom: 28px; }
+      .hero, .insight-grid, .detail-grid, .registry { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); }
+      .section-head { display: block; } .section-head p { margin-top: 8px; }
+    }
+    @media (max-width: 440px) { h1 { font-size: 47px; } .stats { grid-template-columns: 1fr 1fr; gap: 8px; } .stat { padding: 13px; } .stat b { font-size: 23px; } .metric-row { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><span class="brand-mark">✦</span><span>Biometric From Camera Capture Handwritten Documents</span></div>
+      <nav aria-label="Sections">
+        <a href="#map">Map</a><a href="#results">Results</a><a href="#values">Values</a><a href="#all-results">Source files</a><a href="#artifacts">Artifacts</a><a href="#caveats">Caveats</a>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <div>
+        <div class="eyebrow">Handwritten document biometrics · research dashboard</div>
+        <h1>From camera capture to writer identity.</h1>
+        <p class="intro">A quick visual read of what this repository has tried, what worked best, and where the signal is still weak. Numbers are copied from the checked-in experiment outputs.</p>
+      </div>
+      <div class="status"><span class="pill orange">EXPLORATORY / NOT DEPLOYABLE</span><strong>40 writers</strong><p>Current experiments use page and patch features from handwritten documents.</p></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>120 → 80</b><span>train / test pages</span></div>
+      <div class="stat"><b>1,740 → 1,156</b><span>train / test patches</span></div>
+      <div class="stat"><b>4,096</b><span>raw feature dimensions</span></div>
+      <div class="stat"><b>58.33%</b><span>best reported macro F1</span></div>
+    </div>
+
+    <section id="map">
+      <div class="section-head"><div><div class="eyebrow">01 / the route</div><h2>The project at a glance</h2></div><p>Each stage feeds the next. The repository also branches into statistical features, deep feature extraction, PCA, augmentation, transfer learning, explainability, and two clustering tracks.</p></div>
+      <div class="map-wrap"><div class="map">
+        <div class="map-node"><div class="node-icon">▧</div><span class="pill">INPUT</span><h3>Capture &amp; split</h3><p>40 writers, 5 pages each. Three pages train the system; two pages are held out.</p><a class="pill orange" href="ML_dataset/" target="_blank">Open dataset ↗</a></div>
+        <div class="connector"></div>
+        <div class="map-node"><div class="node-icon">◈</div><span class="pill">REPRESENT</span><h3>Features</h3><p>Statistical descriptors plus CNN embeddings from AlexNet, ResNet50, MobileNetV2 and EfficientNet-B0.</p><a class="pill orange" href="02_DL_feature_extraction/" target="_blank">Feature work ↗</a></div>
+        <div class="connector"></div>
+        <div class="map-node center"><div class="node-icon">◎</div><span class="pill orange">DECIDE</span><h3>Classify / cluster</h3><p>Classifiers, PCA, augmentation, transfer learning, LIME, K-Means and agglomerative clustering test whether handwriting separates by writer.</p><a class="pill" href="#results">See outcomes ↓</a></div>
+      </div></div>
+    </section>
+
+    <section id="results">
+      <div class="section-head"><div><div class="eyebrow">02 / signal check</div><h2>Best versus worst</h2></div><p>“Best” and “worst” are kept in their experiment context: the datasets and feature pipelines are not identical, so these are not a single leaderboard.</p></div>
+      <div class="insight-grid">
+        <article class="insight best">
+          <span class="pill">BEST REPORTED CLASSIFIER</span><h3>ResNet50 features + Random Forest</h3>
+          <p>On the ResNet50 classifier comparison, Random Forest is the strongest combination across the reported metrics.</p>
+          <div class="metric-row"><div class="metric"><b>60.0%</b><span>accuracy</span></div><div class="metric"><b>57.5%</b><span>macro precision</span></div><div class="metric"><b>58.33%</b><span>macro F1</span></div></div>
+          <a class="pill" href="02_DL_feature_extraction/resnet50/classifier_results/classifier_comparison.csv" target="_blank" rel="noopener">Open source CSV ↗</a>
+        </article>
+        <article class="insight worst">
+          <span class="pill red">WEAKEST REPORTED CLASSIFIER</span><h3>Statistical features + MLP</h3>
+          <p>In the statistical-feature comparison, MLP is the lowest row by accuracy and macro F1, with AdaBoost close behind.</p>
+          <div class="metric-row"><div class="metric"><b>7.5%</b><span>accuracy</span></div><div class="metric"><b>1.37%</b><span>macro precision</span></div><div class="metric"><b>2.19%</b><span>macro F1</span></div></div>
+          <a class="pill red" href="01_Statistical_features/statistical_features_classifier_comparison.csv" target="_blank" rel="noopener">Open source CSV ↗</a>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div><div class="eyebrow">03 / compare the branches</div><h2>What the experiments say</h2></div><p>The strongest patterns and the failure modes are visible without opening every CSV.</p></div>
+      <div class="detail-grid">
+        <article class="card"><span class="pill">STATISTICAL FEATURES</span><h3>Logistic Regression leads</h3><p class="sub">11 classifiers · 40 writers · page-level split</p><div class="bar"><i style="width:60%"></i></div><table class="mini-table"><tr class="good"><td>Logistic Regression / accuracy</td><td>60%</td></tr><tr><td>Linear SVM / macro F1</td><td>47.5%</td></tr><tr class="bad"><td>MLP / macro F1</td><td>2.19%</td></tr></table><a class="pill" href="01_Statistical_features/statistical_features_classifier_comparison.csv" target="_blank" rel="noopener">Open source CSV ↗</a></article>
+        <article class="card"><span class="pill">TRANSFER LEARNING</span><h3>MobileNetV2 leads baseline</h3><p class="sub">572 test images · four CNN backbones</p><div class="bar"><i style="width:50.7%"></i></div><table class="mini-table"><tr class="good"><td>MobileNetV2 / accuracy</td><td>50.7%</td></tr><tr><td>ResNet50 / accuracy</td><td>47.9%</td></tr><tr class="bad"><td>EfficientNet-B0 / macro F1</td><td>42.13%</td></tr></table><a class="pill" href="03_Transfer_learning/baseline%20models/transfer_learning_model_comparison.csv" target="_blank" rel="noopener">Open source CSV ↗</a></article>
+        <article class="card"><span class="pill">CLUSTERING V2</span><h3>Preprocessing changes the outcome</h3><p class="sub">K = 40 · PCA retained about 95% variance</p><div class="bar"><i style="width:57.5%"></i></div><table class="mini-table"><tr class="good"><td>L2 / raw → PCA / accuracy</td><td>57.5%</td></tr><tr><td>Standard scaler → PCA</td><td>28.75%</td></tr><tr class="bad"><td>Test ARI, standard scaler</td><td>0.0295</td></tr></table><a class="pill" href="cluster/Clustering_v2/clustering_results/preprocessing_comparison_k40.csv" target="_blank" rel="noopener">Open source CSV ↗</a></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div><div class="eyebrow">03.5 / the remaining branches</div><h2>Other experiments are still part of the story</h2></div><p>These tracks are easy to miss in a folder tree, so they are called out here with direct links to their result files.</p></div>
+      <div class="detail-grid">
+        <article class="card"><span class="pill orange">AUGMENTATION</span><h3>Translation is the strongest sampled run</h3><p class="sub">Four CNN backbones × translation, rotation, scaling, brightness/contrast</p><div class="bar"><i style="width:52.62%"></i></div><table class="mini-table"><tr class="good"><td>MobileNetV2 / translation accuracy</td><td>52.62%</td></tr><tr><td>MobileNetV2 / translation macro F1</td><td>50.91%</td></tr><tr class="bad"><td>MobileNetV2 / rotation macro F1</td><td>45.55%</td></tr></table><a class="pill orange" href="03_Transfer_learning/augmentation%20models/mobilenetv2/translation/output/metrics_summary.csv" target="_blank" rel="noopener">Open source CSV ↗</a></article>
+        <article class="card"><span class="pill">PCA ANALYSIS</span><h3>Dimensionality reduction is compared, not assumed</h3><p class="sub">AlexNet, ResNet50, MobileNetV2 and EfficientNet-B0 · 90/95/98/99% variance targets</p><div class="bar"><i style="width:95.15%"></i></div><table class="mini-table"><tr class="good"><td>ResNet50 original + Random Forest / F1</td><td>52.08%</td></tr><tr><td>ResNet50 PCA 95% + Logistic / F1</td><td>47.25%</td></tr><tr class="bad"><td>ResNet50 PCA 95% + KNN-5 / F1</td><td>5.32%</td></tr></table><a class="pill" href="02_DL_feature_extraction/PCA/results/resnet50/pca_comparison.csv" target="_blank" rel="noopener">Open source CSV ↗</a></article>
+        <article class="card"><span class="pill">CLUSTERING V1</span><h3>Agglomerative clustering adds a second baseline</h3><p class="sub">160 samples · 4,096 original or 100 PCA features · 40 requested clusters</p><div class="bar"><i style="width:66.55%"></i></div><table class="mini-table"><tr class="good"><td>PCA 100 + Ward / NMI</td><td>0.6655</td></tr><tr><td>PCA 100 + Ward / ARI</td><td>0.1287</td></tr><tr class="bad"><td>Original scaled + Average / ARI</td><td>0.0123</td></tr></table><a class="pill" href="cluster/Clustering_v1/clustering_results/07_agglomerative_comparison.csv" target="_blank" rel="noopener">Open source CSV ↗</a></article>
+      </div>
+    </section>
+
+    <section id="values">
+      <div class="section-head"><div><div class="eyebrow">04 / measured values</div><h2>The results, not just the file names</h2></div><p>These are the reported values from the result CSVs. Percentages are shown as percentages; clustering scores are shown on their original 0–1 scale.</p></div>
+      <div class="detail-grid">
+        <article class="card"><span class="pill">STATISTICAL FEATURES / ORIGINAL</span><h3>All classifier results</h3><div class="table-scroll"><table class="value-table"><thead><tr><th>Classifier</th><th>Acc.</th><th>Macro P</th><th>Macro R</th><th>Macro F1</th></tr></thead><tbody>
+          <tr class="best"><td>Logistic Regression</td><td>60%</td><td>50%</td><td>60%</td><td>52.92%</td></tr><tr><td>Linear SVM</td><td>50%</td><td>46.25%</td><td>50%</td><td>47.5%</td></tr><tr><td>XGBoost</td><td>42.5%</td><td>35%</td><td>42.5%</td><td>37%</td></tr><tr><td>Random Forest</td><td>40%</td><td>34.58%</td><td>40%</td><td>36.25%</td></tr><tr><td>RBF SVM</td><td>37.5%</td><td>30.42%</td><td>37.5%</td><td>32.5%</td></tr><tr><td>KNN (K=5)</td><td>32.5%</td><td>28.33%</td><td>32.5%</td><td>29.58%</td></tr><tr><td>Naive Bayes</td><td>32.5%</td><td>28.69%</td><td>32.5%</td><td>29.38%</td></tr><tr><td>KNN (K=3)</td><td>35%</td><td>26.46%</td><td>35%</td><td>28.92%</td></tr><tr><td>Decision Tree</td><td>30%</td><td>23.54%</td><td>30%</td><td>25.17%</td></tr><tr class="worst"><td>AdaBoost</td><td>10%</td><td>2.41%</td><td>10%</td><td>3.52%</td></tr><tr class="worst"><td>MLP Classifier</td><td>7.5%</td><td>1.37%</td><td>7.5%</td><td>2.19%</td></tr>
+        </tbody></table></div></article>
+        <article class="card"><span class="pill">STATISTICAL + PATCH PCA</span><h3>Best result at each variance target</h3><div class="table-scroll"><table class="value-table"><thead><tr><th>Dataset / PCA</th><th>Dims</th><th>Explained</th><th>Best classifier</th><th>Acc.</th><th>F1</th></tr></thead><tbody>
+          <tr class="best"><td>Statistical / original</td><td>24</td><td>100%</td><td>Logistic</td><td>60%</td><td>52.92%</td></tr><tr><td>Statistical / 90%</td><td>5</td><td>91.44%</td><td>Linear SVM</td><td>35%</td><td>31.25%</td></tr><tr><td>Statistical / 95%</td><td>7</td><td>96.28%</td><td>Logistic</td><td>45%</td><td>35.17%</td></tr><tr><td>Statistical / 98%</td><td>9</td><td>98.70%</td><td>Logistic</td><td>55%</td><td>46.67%</td></tr><tr><td>Statistical / 99%</td><td>10</td><td>99.34%</td><td>Random Forest</td><td>55%</td><td>47.92%</td></tr><tr><td>Patch / original</td><td>6</td><td>100%</td><td>Logistic</td><td>35%</td><td>27.92%</td></tr><tr><td>Patch / 90%</td><td>2</td><td>93.36%</td><td>Linear SVM</td><td>20%</td><td>13.25%</td></tr><tr><td>Patch / 95%</td><td>3</td><td>98.12%</td><td>Logistic</td><td>22.5%</td><td>17.13%</td></tr><tr><td>Patch / 98%</td><td>3</td><td>98.12%</td><td>Logistic</td><td>22.5%</td><td>17.13%</td></tr><tr><td>Patch / 99%</td><td>4</td><td>99.72%</td><td>Linear SVM</td><td>45%</td><td>39.17%</td></tr>
+        </tbody></table></div></article>
+        <article class="card"><span class="pill">DEEP LEARNING PCA / RESNET50</span><h3>ResNet50 PCA classifier winners</h3><div class="table-scroll"><table class="value-table"><thead><tr><th>Configuration</th><th>Dims</th><th>Explained</th><th>Best classifier</th><th>Acc.</th><th>F1</th></tr></thead><tbody>
+          <tr><td>Original</td><td>2048</td><td>100%</td><td>Random Forest</td><td>57.5%</td><td>52.08%</td></tr><tr><td>PCA 90%</td><td>88</td><td>90.24%</td><td>Logistic</td><td>42.5%</td><td>38.75%</td></tr><tr><td>PCA 95%</td><td>112</td><td>95.15%</td><td>Logistic</td><td>52.5%</td><td>47.25%</td></tr><tr class="best"><td>PCA 98%</td><td>133</td><td>98.09%</td><td>Logistic</td><td>57.5%</td><td>51.17%</td></tr><tr><td>PCA 99%</td><td>143</td><td>99.08%</td><td>Logistic</td><td>57.5%</td><td>49.92%</td></tr>
+        </tbody></table></div><p class="sub">The same PCA comparison was also run for AlexNet, MobileNetV2 and EfficientNet-B0; their result tables are represented in the source-output section below.</p></article>
+        <article class="card"><span class="pill">DEEP FEATURE PCA / ALL BACKBONES</span><h3>Best classifier at each PCA target</h3><div class="table-scroll"><table class="value-table"><thead><tr><th>Backbone / PCA</th><th>Dims</th><th>Best classifier</th><th>Acc.</th><th>F1</th></tr></thead><tbody>
+          <tr><td>AlexNet / original</td><td>4096</td><td>Random Forest</td><td>70%</td><td>63.33%</td></tr><tr><td>AlexNet / 90%</td><td>—</td><td>MLP</td><td>60%</td><td>55.83%</td></tr><tr><td>AlexNet / 95%</td><td>—</td><td>Logistic</td><td>52.5%</td><td>46.67%</td></tr><tr><td>AlexNet / 98%</td><td>—</td><td>Logistic</td><td>55%</td><td>51.25%</td></tr><tr><td>AlexNet / 99%</td><td>—</td><td>Logistic</td><td>57.5%</td><td>55%</td></tr>
+          <tr><td>MobileNetV2 / original</td><td>1280</td><td>Random Forest</td><td>70%</td><td>65.42%</td></tr><tr><td>MobileNetV2 / 90%</td><td>84</td><td>Logistic</td><td>52.5%</td><td>47.5%</td></tr><tr><td>MobileNetV2 / 95%</td><td>109</td><td>MLP</td><td>57.5%</td><td>52.08%</td></tr><tr><td>MobileNetV2 / 98%</td><td>132</td><td>MLP</td><td>57.5%</td><td>50.58%</td></tr><tr><td>MobileNetV2 / 99%</td><td>143</td><td>Logistic</td><td>60%</td><td>53.33%</td></tr>
+          <tr><td>EfficientNet-B0 / original</td><td>1280</td><td>Logistic</td><td>77.5%</td><td>74.17%</td></tr><tr><td>EfficientNet-B0 / 90%</td><td>61</td><td>SVM-RBF</td><td>80%</td><td>76.25%</td></tr><tr><td>EfficientNet-B0 / 95%</td><td>89</td><td>SVM-Linear</td><td>82.5%</td><td>80%</td></tr><tr><td>EfficientNet-B0 / 98%</td><td>120</td><td>SVM-Linear</td><td>82.5%</td><td>78.75%</td></tr><tr class="best"><td>EfficientNet-B0 / 99%</td><td>135</td><td>SVM-Linear / Logistic</td><td>87.5%</td><td>85%</td></tr>
+        </tbody></table></div><p class="sub">AlexNet PCA dimensions are recorded in its result files; the table preserves the measured accuracy and macro F1 winners.</p></article>
+        <article class="card"><span class="pill orange">AUGMENTATION / ALL 16 RUNS</span><h3>Accuracy and macro F1</h3><div class="table-scroll"><table class="value-table"><thead><tr><th>Model / transform</th><th>Acc.</th><th>Macro F1</th></tr></thead><tbody>
+          <tr><td>AlexNet / translation</td><td>48.95%</td><td>48.49%</td></tr><tr><td>AlexNet / rotation</td><td>47.38%</td><td>47.41%</td></tr><tr><td>AlexNet / scaling</td><td>47.55%</td><td>46.49%</td></tr><tr><td>AlexNet / brightness</td><td>46.15%</td><td>45.46%</td></tr><tr class="best"><td>MobileNetV2 / translation</td><td>52.62%</td><td>50.91%</td></tr><tr><td>MobileNetV2 / rotation</td><td>46.85%</td><td>45.55%</td></tr><tr><td>MobileNetV2 / scaling</td><td>52.97%</td><td>51.78%</td></tr><tr><td>MobileNetV2 / brightness</td><td>52.97%</td><td>51.49%</td></tr><tr><td>ResNet50 / translation</td><td>49.65%</td><td>49.10%</td></tr><tr><td>ResNet50 / rotation</td><td>44.41%</td><td>43.82%</td></tr><tr><td>ResNet50 / scaling</td><td>48.43%</td><td>48.27%</td></tr><tr><td>ResNet50 / brightness</td><td>48.78%</td><td>47.76%</td></tr><tr><td>EfficientNet-B0 / translation</td><td>43.36%</td><td>41.52%</td></tr><tr class="worst"><td>EfficientNet-B0 / rotation</td><td>39.16%</td><td>37.04%</td></tr><tr><td>EfficientNet-B0 / scaling</td><td>41.43%</td><td>38.32%</td></tr><tr><td>EfficientNet-B0 / brightness</td><td>47.38%</td><td>44.88%</td></tr>
+        </tbody></table></div></article>
+        <article class="card"><span class="pill">CLUSTERING</span><h3>Reported clustering values</h3><div class="table-scroll"><table class="value-table"><thead><tr><th>Track / method</th><th>Silhouette</th><th>ARI</th><th>NMI</th><th>Accuracy / purity</th></tr></thead><tbody>
+          <tr><td>V1 / PCA100 Ward</td><td>0.0191</td><td>0.1287</td><td>0.6655</td><td>—</td></tr><tr><td>V1 / original Ward</td><td>0.0147</td><td>0.0985</td><td>0.6454</td><td>—</td></tr><tr class="best"><td>V2 / raw→PCA95 K=40</td><td>0.1584</td><td>0.2326</td><td>0.8255</td><td>57.5%</td></tr><tr><td>V2 / L2→PCA95 K=40</td><td>0.1637</td><td>0.2202</td><td>0.8292</td><td>57.5%</td></tr><tr class="worst"><td>V2 / scaler→PCA95 K=40</td><td>0.0286</td><td>0.0295</td><td>0.6327</td><td>28.75%</td></tr>
+        </tbody></table></div></article>
+      </div>
+    </section>
+
+    <section id="all-results">
+      <div class="section-head"><div><div class="eyebrow">05 / source files</div><h2>Optional source-output index</h2></div><p>The values above are the dashboard view. These links are only for opening the original CSVs, images, scripts, and notes when deeper verification is needed.</p></div>
+      <div class="registry">
+        <article class="card">
+          <span class="pill">STATISTICAL FEATURES</span><h3>Raw classifiers + statistical PCA</h3>
+          <ul class="registry-list">
+            <li><span>Classifier comparison</span><a href="01_Statistical_features/statistical_features_classifier_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>Classifier metrics</span><a href="01_Statistical_features/output/classifier_metrics.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>PCA / statistical features</span><a href="01_Statistical_features/PCA/results/statistical_features/pca_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>PCA / patch features</span><a href="01_Statistical_features/PCA/results/patch_features/pca_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>Statistical PCA dimensions</span><a href="01_Statistical_features/PCA/results/statistical_features/pca_dimensions.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>Patch PCA dimensions</span><a href="01_Statistical_features/PCA/results/patch_features/pca_dimensions.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>Feature PCA notes</span><a href="01_Statistical_features/PCA/results/statistical_features/experiment_notes.txt" target="_blank" rel="noopener">TXT ↗</a></li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill">DL FEATURES</span><h3>CNN classifiers + deep PCA</h3>
+          <ul class="registry-list">
+            <li><span>AlexNet classifier results</span><a href="02_DL_feature_extraction/alexnet/classifier_results/classifier_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 classifier results</span><a href="02_DL_feature_extraction/resnet50/classifier_results/classifier_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>MobileNetV2 classifier results</span><a href="02_DL_feature_extraction/mobilenetv2/classifier_results/classifier_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>EfficientNet-B0 classifier results</span><a href="02_DL_feature_extraction/efficientnet_b0/classifier_results/classifier_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>AlexNet PCA results</span><a href="02_DL_feature_extraction/PCA/results/alexnet/pca_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 PCA results</span><a href="02_DL_feature_extraction/PCA/results/resnet50/pca_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>MobileNetV2 PCA results</span><a href="02_DL_feature_extraction/PCA/results/mobilenetv2/pca_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>EfficientNet-B0 PCA results</span><a href="02_DL_feature_extraction/PCA/results/efficientnet_b0/pca_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 PCA validation</span><a href="02_DL_feature_extraction/PCA/results/resnet50/validation_results.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill orange">TRANSFER LEARNING</span><h3>Baseline and augmentation outputs</h3>
+          <ul class="registry-list">
+            <li><span>Four-model baseline comparison</span><a href="03_Transfer_learning/baseline%20models/transfer_learning_model_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>MobileNetV2 baseline metrics</span><a href="03_Transfer_learning/baseline%20models/mobilenetv2/output/transfer_learning_metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 baseline metrics</span><a href="03_Transfer_learning/baseline%20models/resnet50/output/transfer_learning_metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>All augmentation metrics (16 runs)</span><a href="03_Transfer_learning/augmentation%20models/" target="_blank" rel="noopener">FOLDER ↗</a></li>
+            <li><span>MobileNetV2 translation</span><a href="03_Transfer_learning/augmentation%20models/mobilenetv2/translation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>MobileNetV2 rotation</span><a href="03_Transfer_learning/augmentation%20models/mobilenetv2/rotation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>MobileNetV2 scaling</span><a href="03_Transfer_learning/augmentation%20models/mobilenetv2/scaling/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>MobileNetV2 brightness/contrast</span><a href="03_Transfer_learning/augmentation%20models/mobilenetv2/brightness_contrast/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 translation</span><a href="03_Transfer_learning/augmentation%20models/resnet50/translation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 rotation</span><a href="03_Transfer_learning/augmentation%20models/resnet50/rotation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 scaling</span><a href="03_Transfer_learning/augmentation%20models/resnet50/scaling/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 brightness/contrast</span><a href="03_Transfer_learning/augmentation%20models/resnet50/brightness_contrast/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>AlexNet translation</span><a href="03_Transfer_learning/augmentation%20models/alexnet/translation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>AlexNet rotation</span><a href="03_Transfer_learning/augmentation%20models/alexnet/rotation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>AlexNet scaling</span><a href="03_Transfer_learning/augmentation%20models/alexnet/scaling/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>AlexNet brightness/contrast</span><a href="03_Transfer_learning/augmentation%20models/alexnet/brightness_contrast/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>EfficientNet-B0 translation</span><a href="03_Transfer_learning/augmentation%20models/efficientnet_b0/translation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>EfficientNet-B0 rotation</span><a href="03_Transfer_learning/augmentation%20models/efficientnet_b0/rotation/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>EfficientNet-B0 scaling</span><a href="03_Transfer_learning/augmentation%20models/efficientnet_b0/scaling/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>EfficientNet-B0 brightness/contrast</span><a href="03_Transfer_learning/augmentation%20models/efficientnet_b0/brightness_contrast/output/metrics_summary.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill">CLUSTERING</span><h3>Clustering v1 and v2 outputs</h3>
+          <ul class="registry-list">
+            <li><span>V1 K-Means metrics</span><a href="cluster/Clustering_v1/clustering_results/04_kmeans_metrics.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>V1 K-Means comparison</span><a href="cluster/Clustering_v1/clustering_results/05_pca_kmeans_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>V1 test evaluation</span><a href="cluster/Clustering_v1/clustering_results/06_test_evaluation_metrics.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>V1 agglomerative comparison</span><a href="cluster/Clustering_v1/clustering_results/07_agglomerative_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>V1 agglomerative test metrics</span><a href="cluster/Clustering_v1/clustering_results/08_agglomerative_test_metrics.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>V2 K-Means comparison</span><a href="cluster/Clustering_v2/clustering_results/kmeans_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>V2 preprocessing comparison</span><a href="cluster/Clustering_v2/clustering_results/preprocessing_comparison_k40.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>V2 agglomerative comparison</span><a href="cluster/Clustering_v2/clustering_results/agglomerative_comparison.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill">PIPELINE + EXPLAINABILITY</span><h3>SVM-RBF pipeline and LIME outputs</h3>
+          <ul class="registry-list">
+            <li><span>AlexNet pipeline results</span><a href="pipeline_lime/results/alexnet/pipeline_results.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>ResNet50 pipeline results</span><a href="pipeline_lime/results/resnet50/pipeline_results.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>MobileNetV2 pipeline results</span><a href="pipeline_lime/results/mobilenetv2/pipeline_results.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>EfficientNet-B0 pipeline results</span><a href="pipeline_lime/results/efficientnet_b0/pipeline_results.csv" target="_blank" rel="noopener">CSV ↗</a></li>
+            <li><span>All LIME explanations</span><a href="pipeline_lime/results/" target="_blank" rel="noopener">FOLDER ↗</a></li>
+            <li><span>Pipeline implementation</span><a href="pipeline_lime/pipeline_lime.py" target="_blank" rel="noopener">PY ↗</a></li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill orange">DATA + NOTES</span><h3>Inputs and reproducibility context</h3>
+          <ul class="registry-list">
+            <li><span>Original handwritten pages</span><a href="ML_dataset/" target="_blank" rel="noopener">FOLDER ↗</a></li>
+            <li><span>Patch dataset</span><a href="patch_dataset/" target="_blank" rel="noopener">FOLDER ↗</a></li>
+            <li><span>Feature arrays and metadata</span><a href="features/" target="_blank" rel="noopener">FOLDER ↗</a></li>
+            <li><span>Clustering v2 project notes</span><a href="cluster/Clustering_v2/Clustering_v2_project_notes.txt" target="_blank" rel="noopener">TXT ↗</a></li>
+            <li><span>Statistical PCA notes</span><a href="01_Statistical_features/PCA/results/statistical_features/experiment_notes.txt" target="_blank" rel="noopener">TXT ↗</a></li>
+            <li><span>Patch PCA notes</span><a href="01_Statistical_features/PCA/results/patch_features/experiment_notes.txt" target="_blank" rel="noopener">TXT ↗</a></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="artifacts">
+      <div class="section-head"><div><div class="eyebrow">05 / evidence shelf</div><h2>Open the proof</h2></div><p>These are the most useful generated artifacts for reviewing what happened, not just the summary numbers.</p></div>
+      <div class="detail-grid">
+        <article class="card"><h3>Explainability</h3><p class="sub">LIME uses the selected pipeline to show influential latent features.</p><div class="artifact"><span>MobileNetV2 explanation</span><a href="pipeline_lime/results/mobilenetv2/lime_explanation.html" target="_blank">HTML ↗</a></div><div class="artifact"><span>ResNet50 explanation image</span><a href="pipeline_lime/results/resnet50/lime_explanation.png" target="_blank">PNG ↗</a></div><div class="artifact"><span>Pipeline source</span><a href="pipeline_lime/pipeline_lime.py" target="_blank">PY ↗</a></div></article>
+        <article class="card"><h3>Best model evidence</h3><p class="sub">Confusion matrices expose which writers are being mixed together.</p><div class="artifact"><span>ResNet50 + Random Forest</span><a href="02_DL_feature_extraction/resnet50/classifier_results/RANDOM_FOREST_confusion_matrix.png" target="_blank">PNG ↗</a></div><div class="artifact"><span>Transfer baseline comparison</span><a href="03_Transfer_learning/baseline%20models/transfer_learning_model_comparison.csv" target="_blank">CSV ↗</a></div><div class="artifact"><span>Statistical comparison</span><a href="01_Statistical_features/statistical_features_classifier_comparison.csv" target="_blank">CSV ↗</a></div></article>
+        <article class="card"><h3>Clustering evidence</h3><p class="sub">Unsupervised results are useful for direction, not deployment claims.</p><div class="artifact"><span>Preprocessing comparison</span><a href="cluster/Clustering_v2/clustering_results/preprocessing_comparison_k40.csv" target="_blank">CSV ↗</a></div><div class="artifact"><span>Project notes</span><a href="cluster/Clustering_v2/Clustering_v2_project_notes.txt" target="_blank">TXT ↗</a></div><div class="artifact"><span>K-Means comparison</span><a href="cluster/Clustering_v2/clustering_results/kmeans_comparison.csv" target="_blank">CSV ↗</a></div></article>
+      </div>
+    </section>
+
+    <section id="caveats">
+      <div class="section-head"><div><div class="eyebrow">06 / read before trusting</div><h2>What still needs work</h2></div></div>
+      <div class="callout"><strong>Interpretation guardrail:</strong> the project notes explicitly describe these results as exploratory. The held-out set has only two pages per writer, clustering is evaluated with label-based matching, and LIME explains latent features rather than human-readable handwriting traits. Treat the current best score as a direction for the next experiment, not as production accuracy.</div>
+    </section>
+
+    <footer><span>Built locally from the checked-in results · no external libraries</span><span>Last reviewed: repository outputs currently present</span></footer>
+  </main>
+  <script>
+    // Source-output links intentionally point to the public GitHub repository.
+    // Section anchors (#...) remain local dashboard navigation.
+    const githubRoot = "https://github.com/satyasreepada1101/biometric-from-camera-capture-handwritten-documents";
+    document.querySelectorAll('a[href]').forEach((link) => {
+      const path = link.getAttribute('href');
+      if (!path || path.startsWith('#') || path.startsWith('http')) return;
+      const cleanPath = path.replace(/^\/+/, '');
+      const view = cleanPath.endsWith('/') ? 'tree' : 'blob';
+      link.href = `${githubRoot}/${view}/main/${cleanPath}`;
+    });
+  </script>
+</body>
+</html>
