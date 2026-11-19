@@ -1,0 +1,2 @@
+model,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+MobileNetV2 Full Fine-Tuning,572,1.6727709553458474,0.5944055944055944,0.6105005269031383,0.5958333333333333,0.57838541952278,0.6118011806952309,0.5944055944055944,0.5786683027097742

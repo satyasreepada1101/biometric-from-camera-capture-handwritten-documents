@@ -1,0 +1,2 @@
+model,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+ResNet50 Partial Fine-Tuning,572,1.1069302506796963,0.7115384615384616,0.7492990119397611,0.7203125,0.7098627538403539,0.7432685826193786,0.7115384615384616,0.7031815667647907

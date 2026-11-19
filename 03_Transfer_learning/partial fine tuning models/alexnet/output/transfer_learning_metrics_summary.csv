@@ -1,0 +1,2 @@
+model,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+AlexNet Partial Fine-Tuning,572,2.1355892446908085,0.506993006993007,0.5214971362744619,0.5135416666666666,0.49211246359791705,0.5143162448363295,0.506993006993007,0.4843792112642305

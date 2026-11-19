@@ -1,0 +1,2 @@
+model,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+EfficientNet-B0 Full Fine-Tuning,572,1.4890223641495604,0.6118881118881119,0.6368775682503136,0.6130208333333333,0.5990822422463576,0.6370000868797872,0.6118881118881119,0.5975210790023947

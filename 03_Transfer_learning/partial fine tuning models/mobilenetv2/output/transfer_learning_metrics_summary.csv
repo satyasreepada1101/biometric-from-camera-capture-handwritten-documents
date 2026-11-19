@@ -1,0 +1,2 @@
+model,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+MobileNetV2 Partial Fine-Tuning,572,1.9284830610235255,0.534965034965035,0.534280725175748,0.5526041666666666,0.5203635877421812,0.5260415693680883,0.534965034965035,0.50706122732535
