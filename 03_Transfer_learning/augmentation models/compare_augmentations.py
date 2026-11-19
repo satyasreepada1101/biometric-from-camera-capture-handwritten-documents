@@ -52,6 +52,16 @@ EXPERIMENTS = {
     },
 }
 
+# Combined augmentation results are stored separately from the individual
+# augmentation experiments, with one model folder per CNN.
+COMBINED_ROOT = SCRIPT_DIR / "combined_augmentation"
+COMBINED_MODEL_FOLDERS = {
+    "AlexNet": "alexnet",
+    "EfficientNet-B0": "efficientnet_b0",
+    "MobileNetV2": "mobilenetv2",
+    "ResNet50": "resnet50",
+}
+
 METRIC_COLUMNS = [
     "accuracy", "precision_macro", "recall_macro", "f1_macro",
     "precision_weighted", "recall_weighted", "f1_weighted",
@@ -74,11 +84,15 @@ def find_csv(folder: Path, preferred_name: str):
         return path
     raise FileNotFoundError(f"Missing {preferred_name} in {folder}")
 
-def read_metrics(folder: Path, is_baseline: bool):
-    filename = (
-        "transfer_learning_metrics_summary.csv"
-        if is_baseline else "metrics_summary.csv"
-    )
+def read_metrics(folder: Path, is_baseline: bool, combined_model: str = None):
+    if combined_model:
+        model_prefix = COMBINED_MODEL_FOLDERS[combined_model]
+        filename = f"{model_prefix}_combined_metrics_summary.csv"
+    else:
+        filename = (
+            "transfer_learning_metrics_summary.csv"
+            if is_baseline else "metrics_summary.csv"
+        )
     path = find_csv(folder, filename)
     df = pd.read_csv(path)
     required = set(METRIC_COLUMNS)
@@ -103,9 +117,10 @@ def read_history(folder: Path):
 
 def save_metric_bar_chart(comparison, metric, title, filename):
     models = list(EXPERIMENTS.keys())
-    experiments = ["Baseline", "Rotation", "Translation", "Scaling", "Brightness/Contrast"]
+    experiments = ["Baseline", "Rotation", "Translation", "Scaling",
+                   "Brightness/Contrast", "Combined Augmentation"]
     x = np.arange(len(models))
-    width = 0.15
+    width = 0.12
 
     fig, ax = plt.subplots(figsize=(13, 6))
     for i, experiment in enumerate(experiments):
@@ -117,7 +132,8 @@ def save_metric_bar_chart(comparison, metric, title, filename):
             ]
             values.append(float(row.iloc[0][metric]) if not row.empty else np.nan)
 
-        ax.bar(x + (i - 2) * width, values, width, label=experiment)
+        ax.bar(x + (i - (len(experiments) - 1) / 2) * width,
+               values, width, label=experiment)
 
     ax.set_title(title)
     ax.set_xlabel("CNN Model")
@@ -182,6 +198,20 @@ def main():
 
             histories[(model, experiment)] = read_history(folder)
 
+        # Add the combined augmentation result for this CNN.
+        combined_folder = COMBINED_ROOT / COMBINED_MODEL_FOLDERS[model] / "output"
+        combined_metrics = read_metrics(combined_folder, False, combined_model=model)
+        combined_row = {
+            "Model": model,
+            "Experiment": "Combined Augmentation",
+            "Test Images": combined_metrics.get("test_images", np.nan),
+            "Test Loss": combined_metrics.get("test_loss", np.nan),
+        }
+        for column in METRIC_COLUMNS:
+            combined_row[column] = combined_metrics[column]
+        rows.append(combined_row)
+        histories[(model, "Combined Augmentation")] = read_history(combined_folder)
+
     comparison = pd.DataFrame(rows)
     comparison.to_csv(RESULTS_DIR / "overall_classification_comparison.csv", index=False)
 
@@ -196,10 +226,11 @@ def main():
         "augmentation_macro_f1_comparison.png"
     )
 
-    # 4 models x 4 augmentations = 16 loss comparison plots.
+    # 4 models x 5 augmentation experiments = 20 loss comparison plots.
     for model, experiments in EXPERIMENTS.items():
         baseline_history = histories[(model, "Baseline")]
-        for augmentation in ["Rotation", "Translation", "Scaling", "Brightness/Contrast"]:
+        for augmentation in ["Rotation", "Translation", "Scaling",
+                            "Brightness/Contrast", "Combined Augmentation"]:
             save_loss_comparison(
                 model, augmentation, baseline_history,
                 histories[(model, augmentation)]
@@ -210,7 +241,7 @@ def main():
     print(f"Accuracy plot: {RESULTS_DIR / 'augmentation_accuracy_comparison.png'}")
     print(f"Macro F1 plot: {RESULTS_DIR / 'augmentation_macro_f1_comparison.png'}")
     print(f"Loss plots: {RESULTS_DIR / 'loss_comparisons'}")
-    print("\nTotal expected outputs: 1 combined CSV + 2 comparison plots + 16 loss plots.")
+    print("\nTotal expected outputs: 1 combined CSV + 2 comparison plots + 20 loss plots.")
 
 if __name__ == "__main__":
     main()
