@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+EfficientNet-B0,Combined_Augmentation,572,1.7981922893257407,0.5174825174825175,0.526260975866239,0.5229166666666667,0.5106726205424412,0.5232558755194014,0.5174825174825175,0.5059481152859779
