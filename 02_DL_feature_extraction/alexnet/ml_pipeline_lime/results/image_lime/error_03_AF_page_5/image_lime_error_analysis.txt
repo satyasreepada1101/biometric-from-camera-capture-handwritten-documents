@@ -1,0 +1,27 @@
+ALEXNET IMAGE LIME ERROR ANALYSIS
+============================================================
+
+Error number: 3
+Test sample index: 6
+Original page: C:\Users\dheep\OneDrive\college\sem5\biometric-from-camera-capture-handwritten-documents\ML_dataset\AF\page_5.jpg
+Actual writer: AF
+Actual writer ID: 6
+Predicted writer ID: 33
+Prediction probability: 0.100000
+Number of LIME regions: 12
+Used patch numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+LIME REGION CONTRIBUTIONS
+------------------------------------------------------------
+Patch 01: +0.015516 (POSITIVE - supports prediction)
+Patch 07: +0.012147 (POSITIVE - supports prediction)
+Patch 04: +0.010459 (POSITIVE - supports prediction)
+Patch 03: +0.007643 (POSITIVE - supports prediction)
+Patch 08: +0.006462 (POSITIVE - supports prediction)
+Patch 10: +0.004635 (POSITIVE - supports prediction)
+Patch 06: +0.002217 (POSITIVE - supports prediction)
+Patch 09: +0.001749 (POSITIVE - supports prediction)
+Patch 02: -0.001667 (NEGATIVE - opposes prediction)
+Patch 05: -0.001450 (NEGATIVE - opposes prediction)
+Patch 12: +0.000575 (POSITIVE - supports prediction)
+Patch 11: -0.000190 (NEGATIVE - opposes prediction)

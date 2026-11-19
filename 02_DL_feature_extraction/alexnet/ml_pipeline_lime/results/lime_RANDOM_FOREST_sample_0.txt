@@ -1,0 +1,21 @@
+ALEXNET ML PIPELINE + LIME EXPLANATION
+============================================================
+
+Classifier: RANDOM_FOREST
+Test sample index: 0
+Actual writer: 0
+Predicted writer: 0
+Predicted class index: 0
+
+Top LIME Features:
+------------------------------------------------------------
+AlexNet_Feature_3956 <= 0.00	-0.009381
+AlexNet_Feature_4003 <= 0.00	-0.007481
+AlexNet_Feature_2057 <= 0.00	-0.006376
+AlexNet_Feature_532 <= 0.00	-0.005603
+AlexNet_Feature_3167 <= 0.00	-0.004973
+AlexNet_Feature_3391 <= 0.00	+0.004970
+AlexNet_Feature_2343 <= 0.00	-0.004437
+AlexNet_Feature_820 <= 0.00	+0.003261
+AlexNet_Feature_914 <= 0.00	+0.002314
+AlexNet_Feature_3283 <= 0.00	+0.001279

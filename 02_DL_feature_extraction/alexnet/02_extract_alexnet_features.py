@@ -1,4 +1,4 @@
-# ============================================================
+
 # 02_extract_alexnet_features.py
 #
 # Purpose:
@@ -22,7 +22,7 @@
 #   features/y_test.npy
 #   features/train_metadata.csv
 #   features/test_metadata.csv
-# ============================================================
+
 
 from pathlib import Path
 import csv
@@ -37,9 +37,9 @@ import torch.nn as nn
 from torchvision import models, transforms
 
 
-# ============================================================
+
 # CONFIGURATION
-# ============================================================
+
 
 PATCH_DATASET_DIR = Path("patch_dataset")
 
@@ -50,9 +50,9 @@ IMAGE_SIZE = 224
 BATCH_SIZE = 32
 
 
-# ============================================================
+
 # DEVICE
-# ============================================================
+
 
 DEVICE = torch.device(
     "cuda" if torch.cuda.is_available()
@@ -68,9 +68,9 @@ print(
 )
 
 
-# ============================================================
+
 # LOAD PRETRAINED ALEXNET
-# ============================================================
+
 
 print(
     "\nLoading pretrained AlexNet..."
@@ -89,9 +89,9 @@ alexnet = alexnet.to(DEVICE)
 alexnet.eval()
 
 
-# ============================================================
+
 # IMAGE PREPROCESSING
-# ============================================================
+
 
 transform = transforms.Compose([
 
@@ -119,9 +119,9 @@ transform = transforms.Compose([
 ])
 
 
-# ============================================================
+
 # GET WRITER DIRECTORIES
-# ============================================================
+
 
 def get_writer_dirs(split_dir):
 
@@ -134,9 +134,9 @@ def get_writer_dirs(split_dir):
     )
 
 
-# ============================================================
+
 # GET PATCH FILES
-# ============================================================
+
 
 def get_patch_files(split_dir):
 
@@ -171,9 +171,9 @@ def get_patch_files(split_dir):
     return samples
 
 
-# ============================================================
+
 # EXTRACT FEATURES FROM ONE BATCH
-# ============================================================
+
 
 def extract_batch_features(images):
 
@@ -225,9 +225,9 @@ def extract_batch_features(images):
     return x.cpu()
 
 
-# ============================================================
+
 # EXTRACT FEATURES FOR A SPLIT
-# ============================================================
+
 
 def extract_features_for_split(split_name):
 
@@ -450,9 +450,9 @@ def extract_features_for_split(split_name):
     return X, y, all_metadata
 
 
-# ============================================================
+
 # MAIN
-# ============================================================
+
 
 def main():
 
@@ -515,9 +515,9 @@ def main():
     )
 
 
-# ============================================================
+
 # RUN
-# ============================================================
+
 
 if __name__ == "__main__":
     main()

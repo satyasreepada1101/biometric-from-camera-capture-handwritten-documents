@@ -217,9 +217,9 @@ def extract_features_for_split(split_name):
 
     all_metadata = []
 
-    # --------------------------------------------------------
+   
     # Process batches manually
-    # --------------------------------------------------------
+   
 
     for start in range(
         0,
@@ -408,9 +408,9 @@ def extract_features_for_split(split_name):
 
 def main():
 
-    # --------------------------------------------------------
+   
     # Check patch dataset
-    # --------------------------------------------------------
+   
 
     if not PATCH_DATASET_DIR.exists():
 
@@ -419,9 +419,9 @@ def main():
             "Run 01_create_patches.py first."
         )
 
-    # --------------------------------------------------------
+   
     # Train features
-    # --------------------------------------------------------
+   
 
     X_train_patches, y_train_patches, train_metadata = (
         extract_features_for_split(
@@ -429,9 +429,9 @@ def main():
         )
     )
 
-    # --------------------------------------------------------
+   
     # Test features
-    # --------------------------------------------------------
+   
 
     X_test_patches, y_test_patches, test_metadata = (
         extract_features_for_split(
@@ -439,9 +439,9 @@ def main():
         )
     )
 
-    # --------------------------------------------------------
+   
     # SAVE PATCH-LEVEL FEATURES
-    # --------------------------------------------------------
+   
 
     print("\n")
     print("=" * 60)
