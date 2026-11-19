@@ -1,0 +1,2 @@
+model,experiment,test_images,test_loss,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted
+AlexNet - Combined Augmentation,Combined_Augmentation,572,1.955743007101379,0.44755244755244755,0.45319057613466845,0.4588541666666667,0.4317398361613639,0.4493952802037668,0.44755244755244755,0.42456276310079477
