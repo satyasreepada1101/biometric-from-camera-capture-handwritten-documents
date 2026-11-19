@@ -16,7 +16,15 @@ import matplotlib.pyplot as plt
 # SETTINGS
 # ==========================================
 
-PROJECT_ROOT = r"C:\Users\prave\Desktop\college projects\biometric-from-camera-capture-handwritten-documents"
+PROJECT_ROOT = os.path.abspath(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "..",
+        "..",
+        ".."
+    )
+)
 
 CSV_PATH = os.path.join(
     PROJECT_ROOT, "patch_dataset", "metadata.csv"
