@@ -1,0 +1,9 @@
+Experiment,Total_Images,Correct_Predictions,Mean_Confidence,Accuracy_Percent
+Baseline,5,3,0.0686243586242199,60.0
+Brightness_Contrast,5,2,0.06849251389503479,40.0
+Combined_Augmentation,5,1,0.12843839675188065,20.0
+Full_Fine_Tuning,5,1,0.42014023661613464,20.0
+Partial_Fine_Tuning,5,2,0.44078784584999087,40.0
+Rotation,5,1,0.08291448205709458,20.0
+Scaling,5,2,0.07648772597312928,40.0
+Translation,5,2,0.0798132836818695,40.0
