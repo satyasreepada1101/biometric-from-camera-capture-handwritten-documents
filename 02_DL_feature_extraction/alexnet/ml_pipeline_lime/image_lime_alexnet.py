@@ -43,7 +43,8 @@ from torchvision import models, transforms
 from sklearn.ensemble import RandomForestClassifier
 
 from lime.lime_image import LimeImageExplainer
-
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
@@ -521,61 +522,47 @@ def create_patch_segments(
 def crop_page_into_patches(
     image
 ):
-
     """
-    Reproduce the exact patch coordinates used
-    during the original patch creation.
+    Reproduce the exact patches created by
+    01_create_patches.py.
 
-    Returns:
-        list of 16 PIL images
+    IMPORTANT:
+    The original pipeline:
+        original page
+            -> crop patch
+            -> save as JPEG quality=95
+            -> reload JPEG
+            -> AlexNet
+
+    Therefore we reproduce the JPEG save/reload step here.
     """
 
     width, height = image.size
 
-    row_height = (
-        height // 4
-    )
+    row_height = height // 4
 
-    standard_patch_width = (
-        row_height
-    )
+    standard_patch_width = row_height
 
     patches = []
 
+    patch_number = 1
+
     for row in range(4):
 
-        top = (
-            row *
-            row_height
-        )
+        top = row * row_height
 
         if row < 3:
-
-            bottom = (
-                (row + 1) *
-                row_height
-            )
-
+            bottom = (row + 1) * row_height
         else:
-
             bottom = height
 
         for col in range(4):
 
-            left = (
-                col *
-                standard_patch_width
-            )
+            left = col * standard_patch_width
 
             if col < 3:
-
-                right = (
-                    (col + 1) *
-                    standard_patch_width
-                )
-
+                right = (col + 1) * standard_patch_width
             else:
-
                 right = width
 
             if left >= width:
@@ -590,21 +577,56 @@ def crop_page_into_patches(
             if bottom > height:
                 bottom = height
 
+            # Exact crop used by 01_create_patches.py
             patch = image.crop(
-                (
-                    left,
-                    top,
-                    right,
-                    bottom
-                )
+                (left, top, right, bottom)
             )
 
             patches.append(
-                patch
+                (
+                    patch_number,
+                    patch
+                )
             )
 
-    return patches
+            patch_number += 1
 
+    return patches
+def reproduce_saved_patch(
+    patch
+):
+    """
+    Reproduce the exact image that AlexNet originally saw.
+
+    Original pipeline:
+        patch
+        -> JPEG quality=95
+        -> saved to disk
+        -> Image.open()
+        -> RGB
+
+    We reproduce that in memory.
+    """
+
+    import io
+
+    buffer = io.BytesIO()
+
+    patch.save(
+        buffer,
+        format="JPEG",
+        quality=95
+    )
+
+    buffer.seek(0)
+
+    reproduced_patch = Image.open(
+        buffer
+    ).convert(
+        "RGB"
+    )
+
+    return reproduced_patch
 
 # ============================================================
 # PAGE PREDICTION FUNCTION FOR LIME
@@ -616,16 +638,25 @@ def make_prediction_function(
 ):
 
     """
-    Create the prediction function expected by LIME.
+    Prediction function used by Image LIME.
 
-    LIME sends perturbed page images here.
+    Exact original project pipeline:
 
-    Each page is:
-        page
-        -> exact 16 patches
-        -> AlexNet features
-        -> mean pooling
-        -> Random Forest
+        LIME page
+            ↓
+        exact 4x4 patches
+            ↓
+        keep original retained patch numbers
+            ↓
+        JPEG quality=95
+            ↓
+        AlexNet
+            ↓
+        4096-D patch features
+            ↓
+        mean pooling
+            ↓
+        Random Forest
     """
 
     def predict(images):
@@ -635,56 +666,54 @@ def make_prediction_function(
         for image_array in images:
 
             # ------------------------------------------------
-            # Convert numpy image back to PIL
+            # Convert LIME numpy image to PIL
             # ------------------------------------------------
 
             image = Image.fromarray(
-                image_array.astype(
-                    np.uint8
-                )
-            ).convert(
-                "RGB"
+                image_array.astype(np.uint8)
+            ).convert("RGB")
+
+            # ------------------------------------------------
+            # Recreate exact patches
+            # ------------------------------------------------
+
+            patches = crop_page_into_patches(
+                image
             )
-
-            # ------------------------------------------------
-            # Recreate the exact 16 patches
-            # ------------------------------------------------
-
-            patches = (
-                crop_page_into_patches(
-                    image
-                )
-            )
-
-            # ------------------------------------------------
-            # Keep exactly the patches that were used in
-            # the original page-level feature.
-            #
-            # Patch numbers are 1-16.
-            # List positions are 0-15.
-            # ------------------------------------------------
 
             selected_patches = []
 
-            for patch_number in (
-                kept_patch_numbers
-            ):
+            # ------------------------------------------------
+            # Select exactly the patches that were retained
+            # in the original dataset
+            # ------------------------------------------------
 
-                index = (
-                    patch_number - 1
-                )
+            for patch_number, patch in patches:
 
-                if (
-                    0 <= index <
-                    len(patches)
-                ):
+                if patch_number in kept_patch_numbers:
+
+                    # Reproduce the original JPEG
+                    patch = reproduce_saved_patch(
+                        patch
+                    )
 
                     selected_patches.append(
-                        patches[index]
+                        patch
                     )
 
             # ------------------------------------------------
-            # Extract 4096-D AlexNet features
+            # Safety check
+            # ------------------------------------------------
+
+            if len(selected_patches) == 0:
+
+                raise RuntimeError(
+                    "No retained patches found "
+                    "for this page."
+                )
+
+            # ------------------------------------------------
+            # AlexNet features
             # ------------------------------------------------
 
             patch_features = (
@@ -694,7 +723,8 @@ def make_prediction_function(
             )
 
             # ------------------------------------------------
-            # Mean pooling
+            # EXACT SAME PAGE AGGREGATION
+            # used by 03_train_classifiers.py
             # ------------------------------------------------
 
             page_feature = (
@@ -713,7 +743,7 @@ def make_prediction_function(
         )
 
         # ----------------------------------------------------
-        # Random Forest probability
+        # Random Forest
         # ----------------------------------------------------
 
         probabilities = (
@@ -956,10 +986,17 @@ for error_number, sample_index in enumerate(
     # LOAD ORIGINAL PAGE
     # ========================================================
 
+    page_filename = page_key
+
+    if not page_filename.lower().endswith(
+        (".jpg", ".jpeg", ".png", ".bmp")
+    ):
+        page_filename += ".jpg"
+
     page_path = (
         ML_DATASET_DIR /
         actual_writer /
-        f"{page_key}.jpg"
+        page_filename
     )
 
 

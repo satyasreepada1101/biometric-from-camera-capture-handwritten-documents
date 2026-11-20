@@ -1,4 +1,4 @@
-ALEXNET IMAGE LIME ERROR ANALYSIS
+ALEXNET CONTRASTIVE IMAGE LIME ERROR ANALYSIS
 ============================================================
 
 Error number: 2
@@ -7,25 +7,32 @@ Original page: C:\Users\dheep\OneDrive\college\sem5\biometric-from-camera-captur
 Actual writer: AE
 Actual writer ID: 5
 Predicted writer ID: 22
-Prediction probability: 0.185000
+Actual probability: 0.050000
+Predicted probability: 0.180000
 Number of LIME regions: 16
 Used patch numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
-LIME REGION CONTRIBUTIONS
+CONTRASTIVE EXPLANATION
 ------------------------------------------------------------
-Patch 05: +0.013692 (POSITIVE - supports prediction)
-Patch 14: +0.012803 (POSITIVE - supports prediction)
-Patch 13: +0.012740 (POSITIVE - supports prediction)
-Patch 16: +0.012338 (POSITIVE - supports prediction)
-Patch 06: +0.011726 (POSITIVE - supports prediction)
-Patch 15: +0.011433 (POSITIVE - supports prediction)
-Patch 01: +0.011261 (POSITIVE - supports prediction)
-Patch 09: +0.010847 (POSITIVE - supports prediction)
-Patch 02: +0.010046 (POSITIVE - supports prediction)
-Patch 11: +0.009409 (POSITIVE - supports prediction)
-Patch 07: +0.008836 (POSITIVE - supports prediction)
-Patch 12: +0.008520 (POSITIVE - supports prediction)
-Patch 04: +0.007697 (POSITIVE - supports prediction)
-Patch 03: +0.007173 (POSITIVE - supports prediction)
-Patch 08: +0.003285 (POSITIVE - supports prediction)
-Patch 10: +0.003201 (POSITIVE - supports prediction)
+GREEN = favors actual writer
+RED = favors predicted writer
+Contrastive score = actual LIME weight - predicted LIME weight
+
+CONTRASTIVE LIME REGION CONTRIBUTIONS
+------------------------------------------------------------
+Patch 16: contrastive=-0.011451 | actual=+0.002058 | predicted=+0.013508 (RED - favors predicted writer)
+Patch 01: contrastive=-0.010232 | actual=+0.002834 | predicted=+0.013066 (RED - favors predicted writer)
+Patch 15: contrastive=-0.009966 | actual=+0.000916 | predicted=+0.010883 (RED - favors predicted writer)
+Patch 14: contrastive=-0.009552 | actual=+0.004752 | predicted=+0.014304 (RED - favors predicted writer)
+Patch 07: contrastive=-0.008061 | actual=+0.001884 | predicted=+0.009945 (RED - favors predicted writer)
+Patch 05: contrastive=-0.007543 | actual=+0.006116 | predicted=+0.013660 (RED - favors predicted writer)
+Patch 13: contrastive=-0.006401 | actual=+0.005414 | predicted=+0.011814 (RED - favors predicted writer)
+Patch 09: contrastive=-0.006274 | actual=+0.004105 | predicted=+0.010378 (RED - favors predicted writer)
+Patch 06: contrastive=-0.005749 | actual=+0.005366 | predicted=+0.011114 (RED - favors predicted writer)
+Patch 11: contrastive=-0.005644 | actual=+0.003652 | predicted=+0.009296 (RED - favors predicted writer)
+Patch 08: contrastive=-0.004027 | actual=+0.000074 | predicted=+0.004101 (RED - favors predicted writer)
+Patch 10: contrastive=+0.003939 | actual=+0.007898 | predicted=+0.003959 (GREEN - favors actual writer)
+Patch 03: contrastive=-0.003493 | actual=+0.004579 | predicted=+0.008072 (RED - favors predicted writer)
+Patch 04: contrastive=-0.002714 | actual=+0.005468 | predicted=+0.008182 (RED - favors predicted writer)
+Patch 12: contrastive=-0.002154 | actual=+0.004442 | predicted=+0.006596 (RED - favors predicted writer)
+Patch 02: contrastive=+0.000250 | actual=+0.009690 | predicted=+0.009440 (GREEN - favors actual writer)
